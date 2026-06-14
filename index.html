@@ -7,6 +7,23 @@
     <!-- Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Custom scrollbar styling for the suggestions box */
+        .suggestions-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .suggestions-scrollbar::-webkit-scrollbar-track {
+            background: #1f2937;
+            border-radius: 8px;
+        }
+        .suggestions-scrollbar::-webkit-scrollbar-thumb {
+            background: #4f46e5;
+            border-radius: 8px;
+        }
+        .suggestions-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #4338ca;
+        }
+    </style>
 </head>
 <body class="bg-gray-900 text-gray-100 font-sans min-h-screen">
 
@@ -25,31 +42,52 @@
         <!-- Sidebar: Auth, Hardware & Filters -->
         <aside class="space-y-6 lg:col-span-1">
             
-            <!-- Authentication Panel -->
+            <!-- Email & Password Authentication Panel -->
             <div class="bg-gray-800 p-5 rounded-xl border border-gray-700 shadow-sm">
                 <h2 class="text-lg font-bold text-gray-200 mb-3 border-b border-gray-700 pb-2 flex items-center gap-2">
                     <i class="fa-solid fa-user-shield text-indigo-400"></i> Account Access
                 </h2>
-                <!-- Logged Out View -->
+                
+                <!-- Logged Out (Forms Container) -->
                 <div id="loggedOutView" class="space-y-3">
-                    <p class="text-xs text-gray-400">Sign in with Google or Microsoft to save your configuration profile.</p>
-                    <button onclick="signInGoogle()" class="w-full bg-white hover:bg-gray-100 text-gray-900 font-semibold py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition duration-150">
-                        <i class="fa-brands fa-google text-red-500 text-lg"></i> Sign in with Google
-                    </button>
-                    <button onclick="signInMicrosoft()" class="w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition duration-150 border border-gray-600">
-                        <i class="fa-brands fa-microsoft text-blue-400 text-lg"></i> Sign in with Microsoft
-                    </button>
-                </div>
-                <!-- Logged In View -->
-                <div id="loggedInView" class="hidden flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <img id="userAvatar" src="" class="w-10 h-10 rounded-full border border-gray-600 object-cover">
+                    <!-- Switch Login/Register Tabs -->
+                    <div class="flex border-b border-gray-700 text-sm">
+                        <button id="tabLogin" onclick="toggleAuthTab('login')" class="flex-1 py-2 text-center font-bold text-indigo-400 border-b-2 border-indigo-500 transition duration-150">Log In</button>
+                        <button id="tabRegister" onclick="toggleAuthTab('register')" class="flex-1 py-2 text-center font-bold text-gray-400 border-b-2 border-transparent hover:text-gray-200 transition duration-150">Sign Up</button>
+                    </div>
+                    
+                    <form id="authForm" onsubmit="handleAuthSubmit(event)" class="space-y-3 text-xs">
                         <div>
-                            <p id="userName" class="text-sm font-bold text-white leading-tight"></p>
-                            <p id="userProvider" class="text-[10px] text-gray-400 capitalize"></p>
+                            <label class="block text-gray-400 mb-1">Email Address</label>
+                            <input type="email" id="authEmail" required placeholder="name@domain.com" class="w-full bg-gray-700 border border-gray-600 rounded p-2.5 text-white focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-gray-400 mb-1">Password</label>
+                            <input type="password" id="authPassword" required placeholder="Min 6 characters" class="w-full bg-gray-700 border border-gray-600 rounded p-2.5 text-white focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                        </div>
+                        <!-- Optional Phone input field only displayed during Register -->
+                        <div id="phoneField" class="hidden">
+                            <label class="block text-gray-300 mb-1 font-semibold flex justify-between">
+                                <span>Phone Number</span>
+                                <span class="text-gray-500 text-[10px] font-normal">Optional</span>
+                            </label>
+                            <input type="tel" id="authPhone" placeholder="+123456789" class="w-full bg-gray-700 border border-gray-600 rounded p-2.5 text-white focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                        </div>
+                        
+                        <button type="submit" id="authSubmitBtn" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2 rounded transition duration-150 text-sm mt-2">Log In</button>
+                    </form>
+                </div>
+
+                <!-- Logged In View -->
+                <div id="loggedInView" class="hidden flex flex-col gap-4">
+                    <div class="flex items-center gap-3">
+                        <img id="userAvatar" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" class="w-10 h-10 rounded-full border border-gray-600 object-cover bg-gray-700">
+                        <div class="truncate">
+                            <p id="userName" class="text-sm font-bold text-white leading-tight truncate"></p>
+                            <p id="userPhone" class="text-[10px] text-gray-400 mt-0.5 truncate"></p>
                         </div>
                     </div>
-                    <button onclick="signOutUser()" class="text-xs text-red-400 hover:text-red-300 underline font-semibold">Sign Out</button>
+                    <button onclick="signOutUser()" class="w-full bg-gray-700 hover:bg-gray-600 text-xs text-red-400 hover:text-red-300 font-semibold py-2 rounded border border-gray-600 transition">Sign Out</button>
                 </div>
             </div>
 
@@ -59,17 +97,25 @@
                     <i class="fa-solid fa-microchip text-indigo-400"></i> Your Hardware Specs
                 </h2>
                 <div class="space-y-4">
-                    <div>
+                    <!-- CPU Input with dynamic suggestions -->
+                    <div class="relative">
                         <label class="block text-sm text-gray-400 mb-1">Type CPU Model</label>
-                        <input type="text" id="userCpuInput" oninput="onHardwareInput()" placeholder="e.g. Intel Core i7-12700K" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                        <input type="text" id="userCpuInput" oninput="showSuggestions('cpu')" onfocus="showSuggestions('cpu')" placeholder="e.g. Intel Core i7-12700K" autocomplete="off" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                        <div id="cpuSuggestions" class="hidden absolute left-0 right-0 top-full mt-1 max-h-48 overflow-y-auto bg-gray-800 border border-gray-700 rounded-lg z-20 shadow-xl divide-y divide-gray-700/50 suggestions-scrollbar"></div>
                     </div>
-                    <div>
+                    
+                    <!-- GPU Input with dynamic suggestions -->
+                    <div class="relative">
                         <label class="block text-sm text-gray-400 mb-1">Type GPU Model</label>
-                        <input type="text" id="userGpuInput" oninput="onHardwareInput()" placeholder="e.g. NVIDIA GeForce RTX 3060" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                        <input type="text" id="userGpuInput" oninput="showSuggestions('gpu')" onfocus="showSuggestions('gpu')" placeholder="e.g. NVIDIA GeForce RTX 3060" autocomplete="off" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                        <div id="gpuSuggestions" class="hidden absolute left-0 right-0 top-full mt-1 max-h-48 overflow-y-auto bg-gray-800 border border-gray-700 rounded-lg z-20 shadow-xl divide-y divide-gray-700/50 suggestions-scrollbar"></div>
                     </div>
-                    <div>
+                    
+                    <!-- RAM Input with dynamic suggestions -->
+                    <div class="relative">
                         <label class="block text-sm text-gray-400 mb-1">Type RAM Module</label>
-                        <input type="text" id="userRamInput" oninput="onHardwareInput()" placeholder="e.g. 16GB DDR4 3200MHz" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                        <input type="text" id="userRamInput" oninput="showSuggestions('ram')" onfocus="showSuggestions('ram')" placeholder="e.g. 16GB DDR4 3200MHz" autocomplete="off" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                        <div id="ramSuggestions" class="hidden absolute left-0 right-0 top-full mt-1 max-h-48 overflow-y-auto bg-gray-800 border border-gray-700 rounded-lg z-20 shadow-xl divide-y divide-gray-700/50 suggestions-scrollbar"></div>
                     </div>
 
                     <!-- Hardware Parsing Engine Result -->
@@ -230,10 +276,10 @@
     <!-- Firebase Modular Scripts Integration -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, OAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+        import { getAuth, signOut, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
-        // Your direct web app's Firebase configuration
+        // Web app's Firebase configuration coordinates
         const firebaseConfig = {
           apiKey: "AIzaSyBddHUaaK66-nkkrd5QfKAg_A5P9t9GLSQ",
           authDomain: "game-matcher123.firebaseapp.com",
@@ -244,13 +290,45 @@
           measurementId: "G-3QKDCDZ26K"
         };
 
-        // Initialize Firebase services
+        // Initialize Firebase instances
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
 
         let localGames = [];
         let currentUser = null;
+        let activeAuthTab = 'login'; // 'login' or 'register'
+
+        // Hardware Library Lists
+        const cpuList = [
+            "Intel Core i9-14900K", "Intel Core i9-13900K", "Intel Core i7-14700K", "Intel Core i7-13700K", "Intel Core i7-12700K", 
+            "Intel Core i5-14600K", "Intel Core i5-13600K", "Intel Core i5-12400F", "Intel Core i5-10400F", "Intel Core i5-8400", 
+            "Intel Core i3-14100", "Intel Core i3-12100F", "Intel Core i3-10100", "Intel Core i7-8700K", "Intel Core i7-4770K",
+            "AMD Ryzen 9 7950X3D", "AMD Ryzen 9 5900X", "AMD Ryzen 7 7800X3D", "AMD Ryzen 7 5800X3D", "AMD Ryzen 7 5700X", 
+            "AMD Ryzen 5 7600X", "AMD Ryzen 5 5600X", "AMD Ryzen 5 3600", "AMD Ryzen 5 2600", "AMD Ryzen 3 3100", 
+            "AMD Athlon 3000G", "Apple M3 Max", "Apple M2 Pro", "Apple M1"
+        ];
+
+        const gpuList = [
+            "NVIDIA GeForce RTX 4090", "NVIDIA GeForce RTX 4080 Super", "NVIDIA GeForce RTX 4070 Ti Super", "NVIDIA GeForce RTX 4070", 
+            "NVIDIA GeForce RTX 4060 Ti", "NVIDIA GeForce RTX 4060", "NVIDIA GeForce RTX 3090 Ti", "NVIDIA GeForce RTX 3080 Ti", 
+            "NVIDIA GeForce RTX 3070 Ti", "NVIDIA GeForce RTX 3060 Ti", "NVIDIA GeForce RTX 3060", "NVIDIA GeForce RTX 3050", 
+            "NVIDIA GeForce RTX 2080 Super", "NVIDIA GeForce RTX 2070 Super", "NVIDIA GeForce RTX 2060", "NVIDIA GeForce GTX 1660 Super", 
+            "NVIDIA GeForce GTX 1660 Ti", "NVIDIA GeForce GTX 1650 Super", "NVIDIA GeForce GTX 1080 Ti", "NVIDIA GeForce GTX 1070", 
+            "NVIDIA GeForce GTX 1060 6GB", "NVIDIA GeForce GTX 1050 Ti", "AMD Radeon RX 7900 XTX", "AMD Radeon RX 7800 XT", 
+            "AMD Radeon RX 7700 XT", "AMD Radeon RX 7600 XT", "AMD Radeon RX 6950 XT", "AMD Radeon RX 6800 XT", 
+            "AMD Radeon RX 6700 XT", "AMD Radeon RX 6600 XT", "AMD Radeon RX 5700 XT", "AMD Radeon RX 580 8GB", 
+            "AMD Radeon RX 570 4GB", "Intel Arc A770", "Intel Arc A750", "Intel Iris Xe Graphics", "Intel UHD Graphics 770", 
+            "AMD Radeon Graphics (Integrated)"
+        ];
+
+        const ramList = [
+            "4GB DDR3 1600MHz", "8GB DDR3 1600MHz", "16GB DDR3 1600MHz", "8GB DDR4 2400MHz", "8GB DDR4 2666MHz", 
+            "8GB DDR4 3200MHz", "16GB DDR4 2666MHz", "16GB DDR4 3000MHz", "16GB DDR4 3200MHz", "16GB DDR4 3600MHz", 
+            "32GB DDR4 3200MHz", "32GB DDR4 3600MHz", "16GB DDR5 4800MHz", "16GB DDR5 5200MHz", "16GB DDR5 5600MHz", 
+            "16GB DDR5 6000MHz", "32GB DDR5 4800MHz", "32GB DDR5 5200MHz", "32GB DDR5 5600MHz", "32GB DDR5 6000MHz", 
+            "32GB DDR5 6400MHz", "64GB DDR5 6000MHz"
+        ];
 
         // Mock Library for AI Autofill Heuristic
         const popularGames = [
@@ -398,6 +476,70 @@
             return { size, type };
         }
 
+        // Suggestions Box Logic
+        function showSuggestions(type) {
+            const inputElement = document.getElementById(`user${capitalize(type)}Input`);
+            const inputVal = inputElement.value.toLowerCase();
+            const container = document.getElementById(`${type}Suggestions`);
+            container.innerHTML = '';
+
+            let sourceList = [];
+            if (type === 'cpu') sourceList = cpuList;
+            else if (type === 'gpu') sourceList = gpuList;
+            else if (type === 'ram') sourceList = ramList;
+
+            const matches = sourceList.filter(item => item.toLowerCase().includes(inputVal));
+
+            if (matches.length === 0) {
+                container.classList.add('hidden');
+                return;
+            }
+
+            container.classList.remove('hidden');
+
+            matches.forEach(match => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = "p-2.5 text-xs text-gray-300 hover:bg-indigo-600 hover:text-white cursor-pointer transition duration-100 font-medium";
+                itemDiv.textContent = match;
+                
+                // Mousedown is used so it fires before the input loses focus (blur)
+                itemDiv.addEventListener('mousedown', (e) => {
+                    e.preventDefault();
+                    selectSuggestion(type, match);
+                });
+                container.appendChild(itemDiv);
+            });
+        }
+
+        function selectSuggestion(type, value) {
+            const input = document.getElementById(`user${capitalize(type)}Input`);
+            input.value = value;
+            hideSuggestions(type);
+            onHardwareInput();
+        }
+
+        function hideSuggestions(type) {
+            const container = document.getElementById(`${type}Suggestions`);
+            if (container) container.classList.add('hidden');
+        }
+
+        function capitalize(s) {
+            return s.charAt(0).toUpperCase() + s.slice(1);
+        }
+
+        // Auto close suggestions when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('#userCpuInput') && !e.target.closest('#cpuSuggestions')) {
+                hideSuggestions('cpu');
+            }
+            if (!e.target.closest('#userGpuInput') && !e.target.closest('#gpuSuggestions')) {
+                hideSuggestions('gpu');
+            }
+            if (!e.target.closest('#userRamInput') && !e.target.closest('#ramSuggestions')) {
+                hideSuggestions('ram');
+            }
+        });
+
         function onHardwareInput() {
             const cpuVal = document.getElementById('userCpuInput').value;
             const gpuVal = document.getElementById('userGpuInput').value;
@@ -431,8 +573,71 @@
             return "bg-red-950/50 text-red-400 border border-red-800/60";
         }
 
-        // Authentication Event Observers
-        onAuthStateChanged(auth, user => {
+        // Tab selection transition handler
+        function toggleAuthTab(tab) {
+            activeAuthTab = tab;
+            const tabLogin = document.getElementById('tabLogin');
+            const tabRegister = document.getElementById('tabRegister');
+            const phoneField = document.getElementById('phoneField');
+            const authSubmitBtn = document.getElementById('authSubmitBtn');
+
+            if (tab === 'login') {
+                tabLogin.className = "flex-1 py-2 text-center font-bold text-indigo-400 border-b-2 border-indigo-500 transition duration-150";
+                tabRegister.className = "flex-1 py-2 text-center font-bold text-gray-400 border-b-2 border-transparent hover:text-gray-200 transition duration-150";
+                phoneField.classList.add('hidden');
+                authSubmitBtn.textContent = 'Log In';
+            } else {
+                tabLogin.className = "flex-1 py-2 text-center font-bold text-gray-400 border-b-2 border-transparent hover:text-gray-200 transition duration-150";
+                tabRegister.className = "flex-1 py-2 text-center font-bold text-indigo-400 border-b-2 border-indigo-500 transition duration-150";
+                phoneField.classList.remove('hidden');
+                authSubmitBtn.textContent = 'Sign Up';
+            }
+        }
+
+        // Authentication Submission Handler
+        async function handleAuthSubmit(e) {
+            e.preventDefault();
+            const email = document.getElementById('authEmail').value.trim();
+            const password = document.getElementById('authPassword').value;
+            const phone = document.getElementById('authPhone').value.trim();
+
+            if (password.length < 6) {
+                alert("Password must contain at least 6 characters.");
+                return;
+            }
+
+            if (activeAuthTab === 'login') {
+                signInWithEmailAndPassword(auth, email, password)
+                    .then(() => {
+                        clearAuthInputs();
+                    })
+                    .catch(err => alert("Login failed: " + err.message));
+            } else {
+                try {
+                    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                    const user = userCredential.user;
+                    
+                    // Push custom metadata field (phone) to Firestore [5]
+                    await setDoc(doc(db, "users", user.uid), {
+                        email: email,
+                        phone: phone || "No phone added"
+                    });
+                    
+                    clearAuthInputs();
+                } catch (err) {
+                    alert("Registration failed: " + err.message);
+                }
+            }
+        }
+
+        function clearAuthInputs() {
+            document.getElementById('authEmail').value = '';
+            document.getElementById('authPassword').value = '';
+            document.getElementById('authPhone').value = '';
+        }
+
+        // Authentication Observer
+        onAuthStateChanged(auth, async (user) => {
             const loggedOut = document.getElementById('loggedOutView');
             const loggedIn = document.getElementById('loggedInView');
             currentUser = user;
@@ -440,24 +645,27 @@
             if (user) {
                 loggedOut.classList.add('hidden');
                 loggedIn.classList.remove('hidden');
-                document.getElementById('userAvatar').src = user.photoURL || 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png';
-                document.getElementById('userName').textContent = user.displayName || 'Authenticated User';
-                document.getElementById('userProvider').textContent = user.providerData[0]?.providerId || 'Provider';
+                document.getElementById('userName').textContent = user.email;
+                document.getElementById('userPhone').textContent = "Loading configuration Profile...";
+                
+                try {
+                    const docSnap = await getDoc(doc(db, "users", user.uid));
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        document.getElementById('userPhone').textContent = data.phone && data.phone !== "No phone added" 
+                            ? `Phone: ${data.phone}` 
+                            : "No phone number linked";
+                    } else {
+                        document.getElementById('userPhone').textContent = "No phone number linked";
+                    }
+                } catch (err) {
+                    document.getElementById('userPhone').textContent = "Profile synced";
+                }
             } else {
                 loggedOut.classList.remove('hidden');
                 loggedIn.classList.add('hidden');
             }
         });
-
-        function signInGoogle() {
-            const provider = new GoogleAuthProvider();
-            signInWithPopup(auth, provider).catch(e => alert(e.message));
-        }
-
-        function signInMicrosoft() {
-            const provider = new OAuthProvider('microsoft.com');
-            signInWithPopup(auth, provider).catch(e => alert(e.message));
-        }
 
         function signOutUser() {
             signOut(auth);
@@ -656,9 +864,8 @@
 
         // Modal triggers
         function openPinModal() { 
-            // Permission Guard: If database rules require auth, check this before prompting PIN
             if (!currentUser) {
-                alert("Please sign in with Google or Microsoft first to add games.");
+                alert("Please sign in with Email & Password first to add games.");
                 return;
             }
             document.getElementById('pinModal').classList.remove('hidden'); 
@@ -686,8 +893,8 @@
         }
 
         // Global exposing modules for inline click operations
-        window.signInGoogle = signInGoogle;
-        window.signInMicrosoft = signInMicrosoft;
+        window.toggleAuthTab = toggleAuthTab;
+        window.handleAuthSubmit = handleAuthSubmit;
         window.signOutUser = signOutUser;
         window.onHardwareInput = onHardwareInput;
         window.verifyPin = verifyPin;
@@ -698,6 +905,9 @@
         window.closePinModal = closePinModal;
         window.openAddGameModal = openAddGameModal;
         window.closeAddGameModal = closeAddGameModal;
+        window.showSuggestions = showSuggestions;
+        window.selectSuggestion = selectSuggestion;
+        window.hideSuggestions = hideSuggestions;
 
         // Restore saved settings on load
         document.getElementById('userCpuInput').value = localStorage.getItem('raw_cpu_val') || '';
