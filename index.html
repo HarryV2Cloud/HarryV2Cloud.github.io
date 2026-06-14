@@ -260,14 +260,29 @@
                     </div>
                 </div>
 
-                <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-1">Rating / AI Rating</label>
-                    <input type="text" id="gameRating" value="Unrated" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white focus:outline-none">
+                <!-- Split Rating System Forms -->
+                <div class="grid grid-cols-2 gap-4 border-t border-gray-700 pt-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Player Reviews Rating</label>
+                        <input type="text" id="gameRating" placeholder="e.g. 9.0/10 or Very Positive" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">AI Recommendation Status</label>
+                        <select id="gameAiRecommend" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white focus:outline-none">
+                            <option value="Recommended">Recommended 👍</option>
+                            <option value="Not Recommended">Not Recommended 👎</option>
+                        </select>
+                    </div>
                 </div>
 
-                <div class="flex justify-end gap-3 pt-4 border-t border-gray-700">
-                    <button onclick="closeAddGameModal()" class="px-4 py-2 text-gray-400 hover:text-white transition">Cancel</button>
-                    <button onclick="saveNewGame()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2 px-6 rounded-lg transition" id="saveGameBtnText">Save Game</button>
+                <div class="flex justify-between items-center pt-4 border-t border-gray-700">
+                    <button id="deleteGameBtn" onclick="deleteCurrentGame()" class="hidden bg-red-600 hover:bg-red-500 text-white font-semibold py-2 px-4 rounded-lg transition text-sm">
+                        <i class="fa-solid fa-trash"></i> Delete Game
+                    </button>
+                    <div class="flex gap-3 ml-auto">
+                        <button onclick="closeAddGameModal()" class="px-4 py-2 text-gray-400 hover:text-white transition">Cancel</button>
+                        <button onclick="saveNewGame()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2 px-6 rounded-lg transition" id="saveGameBtnText">Save Game</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -277,7 +292,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
         import { getAuth, signOut, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, doc, setDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, setDoc, getDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
         // Web app's Firebase configuration coordinates
         const firebaseConfig = {
@@ -312,9 +327,11 @@
             document.getElementById('reqGpu').value = 'Medium';
             document.getElementById('reqRam').value = '8';
             document.getElementById('gameRating').value = 'Unrated';
+            document.getElementById('gameAiRecommend').value = 'Recommended';
             
             document.getElementById('gameModalTitle').textContent = "Add New Game";
             document.getElementById('saveGameBtnText').textContent = "Save Game";
+            document.getElementById('deleteGameBtn').classList.add('hidden');
         }
 
         // Expanded Hardware Library Lists (Extensive Desktop, Mobile, & Laptop configurations)
@@ -349,6 +366,7 @@
         ];
 
         const ramList = [
+            "4.0 GB SODIMM 3200 MT/s", "4.0 GB DDR4 SODIMM 3200 MT/s", "4.0 GB SODIMM 3200 MT/s (1 of 2 Slots)",
             "4gb ddr4 sodimm 3200mt/s", "4GB DDR4 SODIMM 3200MT/s", "4GB DDR3 1333MHz", "4GB DDR3 1600MHz", "8GB DDR3 1333MHz", "8GB DDR3 1600MHz", "16GB DDR3 1600MHz", 
             "4GB DDR4 2133MHz", "4GB DDR4 2400MHz", "8GB DDR4 2133MHz", "8GB DDR4 2400MHz", "8GB DDR4 2666MHz", 
             "8GB DDR4 3200MHz", "12GB DDR4 2400MHz", "12GB DDR4 3200MHz", "16GB DDR4 2133MHz", "16GB DDR4 2400MHz", 
@@ -358,20 +376,6 @@
             "16GB DDR5 6000MHz", "32GB DDR5 4800MHz", "32GB DDR5 5200MHz", "32GB DDR5 5600MHz", "32GB DDR5 6000MHz", 
             "32GB DDR5 6400MHz", "64GB DDR5 4800MHz", "64GB DDR5 5200MHz", "64GB DDR5 6000MHz", "16GB LPDDR5 6400MHz", 
             "32GB LPDDR5X 7500MHz"
-        ];
-
-        // Mock Library for AI Autofill Heuristic
-        const popularGames = [
-            { keywords: ['cyberpunk', '2077'], cpu: 'High', gpu: 'High', ram: 16, rating: '9.0/10' },
-            { keywords: ['witcher', 'wild hunt'], cpu: 'Medium', gpu: 'Medium', ram: 8, rating: '9.5/10' },
-            { keywords: ['gta', 'grand theft auto'], cpu: 'Medium', gpu: 'Medium', ram: 8, rating: '9.5/10' },
-            { keywords: ['elden ring'], cpu: 'High', gpu: 'High', ram: 16, rating: '9.6/10' },
-            { keywords: ['minecraft'], cpu: 'Low', gpu: 'Low', ram: 4, rating: '9.0/10' },
-            { keywords: ['stardew', 'valley'], cpu: 'Low', gpu: 'Low', ram: 2, rating: '9.8/10' },
-            { keywords: ['valorant'], cpu: 'Medium', gpu: 'Low', ram: 8, rating: '8.0/10' },
-            { keywords: ['red dead', 'rdr2'], cpu: 'High', gpu: 'Medium', ram: 12, rating: '9.7/10' },
-            { keywords: ['alan wake', 'aw2'], cpu: 'High', gpu: 'High', ram: 16, rating: '8.9/10' },
-            { keywords: ['fortnite'], cpu: 'Medium', gpu: 'Medium', ram: 8, rating: '8.5/10' }
         ];
 
         // Hardware Parsers (Enhanced for ARM, Intel Core Ultra, AMD Ryzen AI & high-performance iGPUs)
@@ -506,9 +510,10 @@
             if (!text) return { size: 8, type: "DDR4", speed: "" };
 
             let size = 8;
-            const sizeMatch = text.match(/(\d+)\s*(GB|G)/);
+            // Matches decimal structures like "4.0 GB", "4.0GB" or "4GB"
+            const sizeMatch = text.match(/([\d.]+)\s*(GB|G)/);
             if (sizeMatch) {
-                size = parseInt(sizeMatch[1]);
+                size = Math.round(parseFloat(sizeMatch[1]));
             } else {
                 const numberMatch = text.match(/\b\d+\b/);
                 if (numberMatch) {
@@ -528,15 +533,15 @@
             return { size, type };
         }
 
-        // Star rating UI generation module
+        // Star rating UI generation module [8]
         function getStarHtml(rating) {
             if (!rating || rating.toLowerCase() === 'unrated') {
-                return '<span class="text-gray-500 italic">Unrated</span>';
+                return '<span class="text-gray-500 italic text-xs">Unrated</span>';
             }
             
             // Extract numeric part (handles e.g. "9.0/10" or "4.5" or "9.0")
             const numMatch = rating.match(/[\d.]+/);
-            if (!numMatch) return `<span class="text-amber-400 font-bold">${rating}</span>`;
+            if (!numMatch) return `<span class="text-amber-400 font-bold text-xs">${rating}</span>`;
             
             let val = parseFloat(numMatch[0]);
             // If rating is out of 10, scale it to 5 stars [8]
@@ -780,7 +785,8 @@
                 reqGpu: document.getElementById('reqGpu').value,
                 reqRam: parseInt(document.getElementById('reqRam').value) || 8,
                 rating: document.getElementById('gameRating').value.trim() || 'Unrated',
-                timestamp: isEditMode ? (localGames.find(g => g.id === selectedGameId)?.timestamp || new Date().getTime()) : new Date().getTime()
+                aiRecommend: document.getElementById('gameAiRecommend').value,
+                timestamp: isEditMode ? (localGames.find(g => g.id === selectedGameId)?.timestamp || Date.now()) : Date.now()
             };
 
             if (!game.title) {
@@ -804,6 +810,21 @@
             }
         }
 
+        // Delete game document from live Firestore [5]
+        async function deleteCurrentGame() {
+            if (!isEditMode || !selectedGameId) return;
+            const checkConfirm = confirm("Are you sure you want to permanently delete this game profile?");
+            if (!checkConfirm) return;
+
+            try {
+                await deleteDoc(doc(db, "games", selectedGameId));
+                alert("Game profile removed successfully.");
+                closeAddGameModal();
+            } catch (err) {
+                alert(`Error deleting game: ${err.message}`);
+            }
+        }
+
         // AI Matcher logic
         function runAiReview() {
             const title = document.getElementById('gameTitle').value.trim();
@@ -823,12 +844,16 @@
                 document.getElementById('reqRam').value = matched.ram;
                 document.getElementById('gameRating').value = matched.rating;
                 document.getElementById('gameGenre').value = matched.genre || 'General';
+                // Set AI Recommendation based on score
+                const score = parseFloat(matched.rating) || 0;
+                document.getElementById('gameAiRecommend').value = (score >= 7.0) ? 'Recommended' : 'Not Recommended';
                 alert(`AI matched a profile for "${title}". Review and edit requirements manually if incorrect.`);
             } else {
                 document.getElementById('reqCpu').value = 'Medium';
                 document.getElementById('reqGpu').value = 'Medium';
                 document.getElementById('reqRam').value = '8';
                 document.getElementById('gameRating').value = 'Unrated';
+                document.getElementById('gameAiRecommend').value = 'Recommended';
                 alert(`"${title}" was not recognized. Initialized as "Unrated" with medium baseline requirements. Configure manually.`);
             }
         }
@@ -897,14 +922,15 @@
                 const playability = getPlayability(game, userHardware);
                 const bannerSrc = game.banner || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=400&q=80';
                 const iconSrc = game.icon || 'https://cdn-icons-png.flaticon.com/512/3408/3408506.png';
+                const isRecommended = game.aiRecommend !== 'Not Recommended';
 
                 const card = document.createElement('div');
                 card.className = "bg-gray-800 rounded-xl overflow-hidden border border-gray-700 flex flex-col shadow-md";
                 card.innerHTML = `
                     <div class="h-40 bg-cover bg-center relative" style="background-image: url('${bannerSrc}')">
                         <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-black/50"></div>
-                        <div class="absolute top-3 right-3 bg-gray-900/80 px-2.5 py-1 rounded-md text-xs font-bold flex items-center gap-1">
-                            <i class="fa-solid fa-star text-amber-400"></i> ${game.rating || 'Unrated'}
+                        <div class="absolute top-3 right-3 bg-gray-900/85 px-2.5 py-1 rounded-md text-[10px] font-bold flex items-center gap-1 uppercase tracking-wider ${!isRecommended ? 'text-red-400 border border-red-900/50' : 'text-emerald-400 border border-emerald-900/50'}">
+                            ${!isRecommended ? '👎 Not Recommended' : '👍 AI Recommended'}
                         </div>
                     </div>
                     <div class="p-5 flex-1 flex flex-col justify-between">
@@ -1007,9 +1033,11 @@
             document.getElementById('reqGpu').value = game.reqGpu || 'Medium';
             document.getElementById('reqRam').value = game.reqRam || 8;
             document.getElementById('gameRating').value = game.rating || 'Unrated';
+            document.getElementById('gameAiRecommend').value = game.aiRecommend || 'Recommended';
 
             document.getElementById('gameModalTitle').textContent = "Edit Game Requirements";
             document.getElementById('saveGameBtnText').textContent = "Save Changes";
+            document.getElementById('deleteGameBtn').classList.remove('hidden');
 
             document.getElementById('addGameModal').classList.remove('hidden');
         }
@@ -1048,6 +1076,7 @@
         window.hideSuggestions = hideSuggestions;
         window.clearForm = clearForm;
         window.triggerEditGame = triggerEditGame;
+        window.deleteCurrentGame = deleteCurrentGame;
 
         // Restore saved settings on load
         document.getElementById('userCpuInput').value = localStorage.getItem('raw_cpu_val') || '';
