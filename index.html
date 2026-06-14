@@ -30,7 +30,7 @@
                 <h2 class="text-lg font-bold text-gray-200 mb-3 border-b border-gray-700 pb-2 flex items-center gap-2">
                     <i class="fa-solid fa-user-shield text-indigo-400"></i> Account Access
                 </h2>
-                <!-- Logged Out -->
+                <!-- Logged Out View -->
                 <div id="loggedOutView" class="space-y-3">
                     <p class="text-xs text-gray-400">Sign in with Google or Microsoft to save your configuration profile.</p>
                     <button onclick="signInGoogle()" class="w-full bg-white hover:bg-gray-100 text-gray-900 font-semibold py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition duration-150">
@@ -40,7 +40,7 @@
                         <i class="fa-brands fa-microsoft text-blue-400 text-lg"></i> Sign in with Microsoft
                     </button>
                 </div>
-                <!-- Logged In -->
+                <!-- Logged In View -->
                 <div id="loggedInView" class="hidden flex items-center justify-between">
                     <div class="flex items-center gap-3">
                         <img id="userAvatar" src="" class="w-10 h-10 rounded-full border border-gray-600 object-cover">
@@ -250,6 +250,7 @@
         const auth = getAuth(app);
 
         let localGames = [];
+        let currentUser = null;
 
         // Mock Library for AI Autofill Heuristic
         const popularGames = [
@@ -352,7 +353,6 @@
             }
             else if (text.includes("AMD") || text.includes("RADEON") || text.includes("RX")) {
                 const rx7 = text.includes("RX 7");
-                
                 const rx6 = text.includes("RX 6");
                 const rx5 = text.includes("RX 5") || text.includes("5700") || text.includes("5600") || text.includes("580") || text.includes("570") || text.includes("590");
                 
@@ -435,6 +435,7 @@
         onAuthStateChanged(auth, user => {
             const loggedOut = document.getElementById('loggedOutView');
             const loggedIn = document.getElementById('loggedInView');
+            currentUser = user;
             
             if (user) {
                 loggedOut.classList.add('hidden');
@@ -468,6 +469,10 @@
             snapshot.forEach(doc => {
                 games.push({ id: doc.id, ...doc.data() });
             });
+
+            // Sort games by newest first using timestamp
+            games.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+
             localGames = games;
             populateGenres();
             runAnalysis();
@@ -496,7 +501,7 @@
 
             try {
                 await addDoc(collection(db, "games"), game);
-                alert(`"${game.title}" was successfully committed to your database.`);
+                alert(`"${game.title}" was successfully added.`);
                 closeAddGameModal();
             } catch (err) {
                 alert(`Error saving to Firestore: ${err.message}`);
@@ -650,7 +655,15 @@
         }
 
         // Modal triggers
-        function openPinModal() { document.getElementById('pinModal').classList.remove('hidden'); }
+        function openPinModal() { 
+            // Permission Guard: If database rules require auth, check this before prompting PIN
+            if (!currentUser) {
+                alert("Please sign in with Google or Microsoft first to add games.");
+                return;
+            }
+            document.getElementById('pinModal').classList.remove('hidden'); 
+        }
+        
         function closePinModal() {
             document.getElementById('pinModal').classList.add('hidden');
             document.getElementById('adminPin').value = '';
