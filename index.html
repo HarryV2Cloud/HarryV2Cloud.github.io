@@ -32,7 +32,7 @@
         <h1 class="text-2xl font-bold text-indigo-400 tracking-wider flex items-center gap-2">
             <i class="fa-solid fa-gamepad"></i> GameMatcher
         </h1>
-        <button id="addGameBtn" onclick="openPinModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2 px-4 rounded-lg flex items-center gap-2 transition duration-200">
+        <button id="addGameBtn" onclick="openPinModal('add')" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2 px-4 rounded-lg flex items-center gap-2 transition duration-200">
             <i class="fa-solid fa-plus"></i> Add Game
         </button>
     </header>
@@ -199,11 +199,11 @@
         </div>
     </div>
 
-    <!-- Modal 2: Add Game Details form -->
+    <!-- Modal 2: Add/Edit Game Details form -->
     <div id="addGameModal" class="hidden fixed inset-0 bg-black/75 flex items-center justify-center p-4 z-50 overflow-y-auto">
         <div class="bg-gray-800 rounded-xl border border-gray-700 max-w-lg w-full p-6 shadow-2xl my-8">
             <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-bold text-white">Add New Game</h3>
+                <h3 class="text-xl font-bold text-white" id="gameModalTitle">Add New Game</h3>
                 <button onclick="closeAddGameModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
 
@@ -239,7 +239,7 @@
                     <div class="grid grid-cols-3 gap-3">
                         <div>
                             <label class="block text-xs text-gray-400 mb-1">Min CPU</label>
-                            <select id="reqCpu" class="bg-gray-700 border border-gray-600 rounded-lg p-2 text-white focus:outline-none">
+                            <select id="reqCpu" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white focus:outline-none">
                                 <option value="Low">Low</option>
                                 <option value="Medium">Medium</option>
                                 <option value="High">High</option>
@@ -247,7 +247,7 @@
                         </div>
                         <div>
                             <label class="block text-xs text-gray-400 mb-1">Min GPU</label>
-                            <select id="reqGpu" class="bg-gray-700 border border-gray-600 rounded-lg p-2 text-white focus:outline-none">
+                            <select id="reqGpu" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white focus:outline-none">
                                 <option value="Low">Low</option>
                                 <option value="Medium">Medium</option>
                                 <option value="High">High</option>
@@ -267,7 +267,7 @@
 
                 <div class="flex justify-end gap-3 pt-4 border-t border-gray-700">
                     <button onclick="closeAddGameModal()" class="px-4 py-2 text-gray-400 hover:text-white transition">Cancel</button>
-                    <button onclick="saveNewGame()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2 px-6 rounded-lg transition">Save Game</button>
+                    <button onclick="saveNewGame()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2 px-6 rounded-lg transition" id="saveGameBtnText">Save Game</button>
                 </div>
             </div>
         </div>
@@ -277,7 +277,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
         import { getAuth, signOut, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, setDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
         // Web app's Firebase configuration coordinates
         const firebaseConfig = {
@@ -298,8 +298,11 @@
         let localGames = [];
         let currentUser = null;
         let activeAuthTab = 'login'; // 'login' or 'register'
+        let activeAuthAction = 'add'; // 'add' or 'edit'
+        let selectedGameId = null;
+        let isEditMode = false;
 
-        // Utility to reset and clear forms properly
+        // Clear Form Utility
         function clearForm() {
             document.getElementById('gameTitle').value = '';
             document.getElementById('gameBanner').value = '';
@@ -309,11 +312,15 @@
             document.getElementById('reqGpu').value = 'Medium';
             document.getElementById('reqRam').value = '8';
             document.getElementById('gameRating').value = 'Unrated';
+            
+            document.getElementById('gameModalTitle').textContent = "Add New Game";
+            document.getElementById('saveGameBtnText').textContent = "Save Game";
         }
 
-        // Expanded Hardware Library Lists (Extensive Desktop & Mobile/Laptop options)
+        // Expanded Hardware Library Lists (Extensive Desktop, Mobile, & Laptop configurations)
         const cpuList = [
-            "Intel(R) Pentium(R) Gold 7505", "Intel Pentium Gold 7505", "Intel Core Ultra 9 185H", "Intel Core Ultra 7 258V", "Intel Core Ultra 7 155H", "Intel Core Ultra 5 226V", "Intel Core Ultra 5 125H",
+            "Intel(R) Pentium(R) Gold 7505", "Intel Pentium Gold 7505", "Intel Pentium Silver N6000", "Intel Celeron N4020", "Intel Celeron N4500", "AMD Athlon Gold 3150U", "AMD Ryzen 3 3250U",
+            "Intel Core Ultra 9 185H", "Intel Core Ultra 7 258V", "Intel Core Ultra 7 155H", "Intel Core Ultra 5 226V", "Intel Core Ultra 5 125H",
             "Intel Core i9-14900HX", "Intel Core i9-14900K", "Intel Core i9-13900K", "Intel Core i9-13980HX", "Intel Core i9-12900H",
             "Intel Core i7-14700HX", "Intel Core i7-14700K", "Intel Core i7-13700H", "Intel Core i7-13700K", "Intel Core i7-12700H", "Intel Core i7-12700K", 
             "Intel Core i5-14600K", "Intel Core i5-13600K", "Intel Core i5-13500H", "Intel Core i5-12500H", "Intel Core i5-12400F", "Intel Core i5-10400F", "Intel Core i5-8400", 
@@ -327,7 +334,8 @@
         ];
 
         const gpuList = [
-            "Intel(R) UHD Graphics", "Intel UHD Graphics", "NVIDIA GeForce RTX 4090", "NVIDIA GeForce RTX 4090 Laptop GPU", "NVIDIA GeForce RTX 4080 Super", "NVIDIA GeForce RTX 4080 Laptop GPU", 
+            "Intel(R) UHD Graphics", "Intel UHD Graphics", "Intel HD Graphics 620", "Intel HD Graphics 520", "AMD Radeon RX Vega 3", "AMD Radeon 610M",
+            "NVIDIA GeForce RTX 4090", "NVIDIA GeForce RTX 4090 Laptop GPU", "NVIDIA GeForce RTX 4080 Super", "NVIDIA GeForce RTX 4080 Laptop GPU", 
             "NVIDIA GeForce RTX 4070 Ti Super", "NVIDIA GeForce RTX 4070 Laptop GPU", "NVIDIA GeForce RTX 4070", "NVIDIA GeForce RTX 4060 Ti", "NVIDIA GeForce RTX 4060 Laptop GPU", "NVIDIA GeForce RTX 4060", "NVIDIA GeForce RTX 4050 Laptop GPU",
             "NVIDIA GeForce RTX 3090 Ti", "NVIDIA GeForce RTX 3080 Ti", "NVIDIA GeForce RTX 3080 Laptop GPU", "NVIDIA GeForce RTX 3070 Ti", "NVIDIA GeForce RTX 3070 Laptop GPU", "NVIDIA GeForce RTX 3060 Ti", "NVIDIA GeForce RTX 3060 Laptop GPU", "NVIDIA GeForce RTX 3060", "NVIDIA GeForce RTX 3050 Laptop GPU", "NVIDIA GeForce RTX 3050 Ti Laptop GPU", "NVIDIA GeForce RTX 3050", 
             "NVIDIA GeForce RTX 2080 Super", "NVIDIA GeForce RTX 2070 Super", "NVIDIA GeForce RTX 2060", "NVIDIA GeForce GTX 1660 Super", 
@@ -341,11 +349,15 @@
         ];
 
         const ramList = [
-            "4GB DDR3 1600MHz", "8GB DDR3 1600MHz", "16GB DDR3 1600MHz", "8GB DDR4 2400MHz", "8GB DDR4 2666MHz", 
-            "8GB DDR4 3200MHz", "16GB DDR4 2666MHz", "16GB DDR4 3000MHz", "16GB DDR4 3200MHz", "16GB DDR4 3600MHz", 
-            "32GB DDR4 3200MHz", "32GB DDR4 3600MHz", "8GB DDR5 4800MHz", "16GB DDR5 4800MHz", "16GB DDR5 5200MHz", "16GB DDR5 5600MHz", 
+            "4GB DDR3 1333MHz", "4GB DDR3 1600MHz", "8GB DDR3 1333MHz", "8GB DDR3 1600MHz", "16GB DDR3 1600MHz", 
+            "4GB DDR4 2133MHz", "4GB DDR4 2400MHz", "8GB DDR4 2133MHz", "8GB DDR4 2400MHz", "8GB DDR4 2666MHz", 
+            "8GB DDR4 3200MHz", "12GB DDR4 2400MHz", "12GB DDR4 3200MHz", "16GB DDR4 2133MHz", "16GB DDR4 2400MHz", 
+            "16GB DDR4 2666MHz", "16GB DDR4 3000MHz", "16GB DDR4 3200MHz", "16GB DDR4 3600MHz", "24GB DDR4 3200MHz",
+            "32GB DDR4 2666MHz", "32GB DDR4 3200MHz", "32GB DDR4 3600MHz", "64GB DDR4 3200MHz", "8GB DDR5 4800MHz", 
+            "8GB DDR5 5200MHz", "12GB DDR5 4800MHz", "16GB DDR5 4800MHz", "16GB DDR5 5200MHz", "16GB DDR5 5600MHz", 
             "16GB DDR5 6000MHz", "32GB DDR5 4800MHz", "32GB DDR5 5200MHz", "32GB DDR5 5600MHz", "32GB DDR5 6000MHz", 
-            "32GB DDR5 6400MHz", "64GB DDR5 6000MHz", "16GB LPDDR5 6400MHz", "32GB LPDDR5X 7500MHz"
+            "32GB DDR5 6400MHz", "64GB DDR5 4800MHz", "64GB DDR5 5200MHz", "64GB DDR5 6000MHz", "16GB LPDDR5 6400MHz", 
+            "32GB LPDDR5X 7500MHz"
         ];
 
         // Mock Library for AI Autofill Heuristic
@@ -418,8 +430,8 @@
                 else if (r3) tier = "Low";
                 else if (text.includes("ATHLON") || text.includes("FX-")) tier = "Low";
             }
-            // Low-end Pentium Gold / Silver support
-            if (text.includes("PENTIUM")) {
+            // Specific Low-end Pentiums (Gold & Silver mobile configurations)
+            if (text.includes("PENTIUM") || text.includes("GOLD") || text.includes("SILVER") || text.includes("CELERON")) {
                 tier = "Low";
             }
             return { name, tier };
@@ -514,6 +526,35 @@
             else if (text.includes("LPDDR4")) type = "LPDDR4";
 
             return { size, type };
+        }
+
+        // Star rating UI generation module
+        function getStarHtml(rating) {
+            if (!rating || rating.toLowerCase() === 'unrated') {
+                return '<span class="text-gray-500 italic">Unrated</span>';
+            }
+            
+            // Extract numeric part (handles e.g. "9.0/10" or "4.5" or "9.0")
+            const numMatch = rating.match(/[\d.]+/);
+            if (!numMatch) return `<span class="text-amber-400 font-bold">${rating}</span>`;
+            
+            let val = parseFloat(numMatch[0]);
+            // If rating is out of 10, scale it to 5 stars [8]
+            if (rating.includes("/10") || val > 5) {
+                val = val / 2;
+            }
+            
+            let starsHtml = '';
+            for (let i = 1; i <= 5; i++) {
+                if (val >= i) {
+                    starsHtml += '<i class="fa-solid fa-star text-amber-400 text-xs"></i>';
+                } else if (val >= i - 0.5) {
+                    starsHtml += '<i class="fa-solid fa-star-half-stroke text-amber-400 text-xs"></i>';
+                } else {
+                    starsHtml += '<i class="fa-regular fa-star text-gray-600 text-xs"></i>';
+                }
+            }
+            return `<div class="flex items-center gap-0.5">${starsHtml}</div>`;
         }
 
         // Suggestions Box Logic
@@ -728,7 +769,7 @@
             console.error("Firestore loading error:", error);
         });
 
-        // Save Action Write-To-Firestore [5]
+        // Save / Update Action Write-To-Firestore [5]
         async function saveNewGame() {
             const game = {
                 title: document.getElementById('gameTitle').value.trim(),
@@ -739,7 +780,7 @@
                 reqGpu: document.getElementById('reqGpu').value,
                 reqRam: parseInt(document.getElementById('reqRam').value) || 8,
                 rating: document.getElementById('gameRating').value.trim() || 'Unrated',
-                timestamp: new Date().getTime()
+                timestamp: isEditMode ? (localGames.find(g => g.id === selectedGameId)?.timestamp || new Date().getTime()) : new Date().getTime()
             };
 
             if (!game.title) {
@@ -748,8 +789,15 @@
             }
 
             try {
-                await addDoc(collection(db, "games"), game);
-                alert(`"${game.title}" was successfully added.`);
+                if (isEditMode) {
+                    // Update existing game entry in real-time Firestore [5]
+                    await updateDoc(doc(db, "games", selectedGameId), game);
+                    alert(`"${game.title}" was successfully updated.`);
+                } else {
+                    // Add new game entry to Firestore [5]
+                    await addDoc(collection(db, "games"), game);
+                    alert(`"${game.title}" was successfully added.`);
+                }
                 closeAddGameModal();
             } catch (err) {
                 alert(`Error saving to Firestore: ${err.message}`);
@@ -774,6 +822,7 @@
                 document.getElementById('reqGpu').value = matched.gpu;
                 document.getElementById('reqRam').value = matched.ram;
                 document.getElementById('gameRating').value = matched.rating;
+                document.getElementById('gameGenre').value = matched.genre || 'General';
                 alert(`AI matched a profile for "${title}". Review and edit requirements manually if incorrect.`);
             } else {
                 document.getElementById('reqCpu').value = 'Medium';
@@ -864,7 +913,10 @@
                                 <img src="${iconSrc}" class="w-10 h-10 rounded-lg object-cover bg-gray-700 border border-gray-600" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3408/3408506.png'">
                                 <div>
                                     <h3 class="text-lg font-bold text-white line-clamp-1">${game.title}</h3>
-                                    <span class="text-xs text-indigo-400 bg-indigo-950 px-2 py-0.5 rounded-full">${game.genre || 'General'}</span>
+                                    <div class="flex flex-wrap items-center gap-2 mt-1.5">
+                                        <span class="text-[10px] text-indigo-400 bg-indigo-950 px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider">${game.genre || 'General'}</span>
+                                        ${getStarHtml(game.rating)}
+                                    </div>
                                 </div>
                             </div>
                             <div class="text-xs space-y-1 text-gray-400 mb-4 bg-gray-900/50 p-2.5 rounded-lg">
@@ -879,6 +931,9 @@
                                 ${playability.status.toUpperCase()}
                             </span>
                             <span class="text-[10px] text-gray-500 mt-1">${playability.text}</span>
+                            <button onclick="triggerEditGame('${game.id}')" class="mt-3 text-[11px] text-gray-400 hover:text-indigo-400 flex items-center gap-1.5 transition font-semibold">
+                                <i class="fa-solid fa-pen-to-square"></i> Edit Requirements
+                            </button>
                         </div>
                     </div>
                 `;
@@ -903,11 +958,12 @@
         }
 
         // Modal triggers
-        function openPinModal() { 
+        function openPinModal(action = 'add') { 
             if (!currentUser) {
-                alert("Please sign in with Email & Password first to add games.");
+                alert("Please sign in with Email & Password first to manage games.");
                 return;
             }
+            activeAuthAction = action;
             document.getElementById('pinModal').classList.remove('hidden'); 
         }
         
@@ -918,18 +974,60 @@
 
         function verifyPin() {
             const pin = document.getElementById('adminPin').value;
-            if (pin === '6769') {
-                closePinModal();
-                openAddGameModal();
-            } else {
-                alert("Incorrect PIN configuration. Authorization Denied.");
+            if (activeAuthAction === 'add') {
+                if (pin === '6769') {
+                    closePinModal();
+                    isEditMode = false;
+                    openAddGameModal();
+                } else {
+                    alert("Incorrect PIN configuration. Authorization Denied.");
+                }
+            } else if (activeAuthAction === 'edit') {
+                if (pin === '6969') {
+                    closePinModal();
+                    isEditMode = true;
+                    openEditGameModal(selectedGameId);
+                } else {
+                    alert("Incorrect Edit PIN. Authorization Denied.");
+                }
             }
         }
 
         function openAddGameModal() { document.getElementById('addGameModal').classList.remove('hidden'); }
+        
+        function openEditGameModal(gameId) {
+            const game = localGames.find(g => g.id === gameId);
+            if (!game) return;
+
+            document.getElementById('gameTitle').value = game.title || '';
+            document.getElementById('gameBanner').value = game.banner || '';
+            document.getElementById('gameIcon').value = game.icon || '';
+            document.getElementById('gameGenre').value = game.genre || '';
+            document.getElementById('reqCpu').value = game.reqCpu || 'Medium';
+            document.getElementById('reqGpu').value = game.reqGpu || 'Medium';
+            document.getElementById('reqRam').value = game.reqRam || 8;
+            document.getElementById('gameRating').value = game.rating || 'Unrated';
+
+            document.getElementById('gameModalTitle').textContent = "Edit Game Requirements";
+            document.getElementById('saveGameBtnText').textContent = "Save Changes";
+
+            document.getElementById('addGameModal').classList.remove('hidden');
+        }
+
         function closeAddGameModal() {
             document.getElementById('addGameModal').classList.add('hidden');
             clearForm();
+        }
+
+        // Trigger PIN popup for editing specs
+        function triggerEditGame(gameId) {
+            if (!currentUser) {
+                alert("Please sign in with Email & Password first to edit games.");
+                return;
+            }
+            activeAuthAction = 'edit';
+            selectedGameId = gameId;
+            openPinModal('edit');
         }
 
         // Global exposing modules for inline click operations
@@ -949,6 +1047,7 @@
         window.selectSuggestion = selectSuggestion;
         window.hideSuggestions = hideSuggestions;
         window.clearForm = clearForm;
+        window.triggerEditGame = triggerEditGame;
 
         // Restore saved settings on load
         document.getElementById('userCpuInput').value = localStorage.getItem('raw_cpu_val') || '';
