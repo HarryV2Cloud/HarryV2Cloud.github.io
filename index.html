@@ -100,14 +100,14 @@
                     <!-- CPU Input with dynamic suggestions -->
                     <div class="relative">
                         <label class="block text-sm text-gray-400 mb-1">Type CPU Model</label>
-                        <input type="text" id="userCpuInput" oninput="showSuggestions('cpu')" onfocus="showSuggestions('cpu')" placeholder="e.g. Intel Core Ultra 7 155H" autocomplete="off" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                        <input type="text" id="userCpuInput" oninput="showSuggestions('cpu')" onfocus="showSuggestions('cpu')" placeholder="e.g. Intel(R) Pentium(R) Gold 7505" autocomplete="off" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
                         <div id="cpuSuggestions" class="hidden absolute left-0 right-0 top-full mt-1 max-h-48 overflow-y-auto bg-gray-800 border border-gray-700 rounded-lg z-20 shadow-xl divide-y divide-gray-700/50 suggestions-scrollbar"></div>
                     </div>
                     
                     <!-- GPU Input with dynamic suggestions -->
                     <div class="relative">
                         <label class="block text-sm text-gray-400 mb-1">Type GPU Model</label>
-                        <input type="text" id="userGpuInput" oninput="showSuggestions('gpu')" onfocus="showSuggestions('gpu')" placeholder="e.g. AMD Radeon 780M" autocomplete="off" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                        <input type="text" id="userGpuInput" oninput="showSuggestions('gpu')" onfocus="showSuggestions('gpu')" placeholder="e.g. Intel(R) UHD Graphics" autocomplete="off" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
                         <div id="gpuSuggestions" class="hidden absolute left-0 right-0 top-full mt-1 max-h-48 overflow-y-auto bg-gray-800 border border-gray-700 rounded-lg z-20 shadow-xl divide-y divide-gray-700/50 suggestions-scrollbar"></div>
                     </div>
                     
@@ -239,7 +239,7 @@
                     <div class="grid grid-cols-3 gap-3">
                         <div>
                             <label class="block text-xs text-gray-400 mb-1">Min CPU</label>
-                            <select id="reqCpu" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white focus:outline-none">
+                            <select id="reqCpu" class="bg-gray-700 border border-gray-600 rounded-lg p-2 text-white focus:outline-none">
                                 <option value="Low">Low</option>
                                 <option value="Medium">Medium</option>
                                 <option value="High">High</option>
@@ -247,7 +247,7 @@
                         </div>
                         <div>
                             <label class="block text-xs text-gray-400 mb-1">Min GPU</label>
-                            <select id="reqGpu" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white focus:outline-none">
+                            <select id="reqGpu" class="bg-gray-700 border border-gray-600 rounded-lg p-2 text-white focus:outline-none">
                                 <option value="Low">Low</option>
                                 <option value="Medium">Medium</option>
                                 <option value="High">High</option>
@@ -299,9 +299,21 @@
         let currentUser = null;
         let activeAuthTab = 'login'; // 'login' or 'register'
 
+        // Utility to reset and clear forms properly
+        function clearForm() {
+            document.getElementById('gameTitle').value = '';
+            document.getElementById('gameBanner').value = '';
+            document.getElementById('gameIcon').value = '';
+            document.getElementById('gameGenre').value = '';
+            document.getElementById('reqCpu').value = 'Medium';
+            document.getElementById('reqGpu').value = 'Medium';
+            document.getElementById('reqRam').value = '8';
+            document.getElementById('gameRating').value = 'Unrated';
+        }
+
         // Expanded Hardware Library Lists (Extensive Desktop & Mobile/Laptop options)
         const cpuList = [
-            "Intel Core Ultra 9 185H", "Intel Core Ultra 7 258V", "Intel Core Ultra 7 155H", "Intel Core Ultra 5 226V", "Intel Core Ultra 5 125H",
+            "Intel(R) Pentium(R) Gold 7505", "Intel Pentium Gold 7505", "Intel Core Ultra 9 185H", "Intel Core Ultra 7 258V", "Intel Core Ultra 7 155H", "Intel Core Ultra 5 226V", "Intel Core Ultra 5 125H",
             "Intel Core i9-14900HX", "Intel Core i9-14900K", "Intel Core i9-13900K", "Intel Core i9-13980HX", "Intel Core i9-12900H",
             "Intel Core i7-14700HX", "Intel Core i7-14700K", "Intel Core i7-13700H", "Intel Core i7-13700K", "Intel Core i7-12700H", "Intel Core i7-12700K", 
             "Intel Core i5-14600K", "Intel Core i5-13600K", "Intel Core i5-13500H", "Intel Core i5-12500H", "Intel Core i5-12400F", "Intel Core i5-10400F", "Intel Core i5-8400", 
@@ -315,7 +327,7 @@
         ];
 
         const gpuList = [
-            "NVIDIA GeForce RTX 4090", "NVIDIA GeForce RTX 4090 Laptop GPU", "NVIDIA GeForce RTX 4080 Super", "NVIDIA GeForce RTX 4080 Laptop GPU", 
+            "Intel(R) UHD Graphics", "Intel UHD Graphics", "NVIDIA GeForce RTX 4090", "NVIDIA GeForce RTX 4090 Laptop GPU", "NVIDIA GeForce RTX 4080 Super", "NVIDIA GeForce RTX 4080 Laptop GPU", 
             "NVIDIA GeForce RTX 4070 Ti Super", "NVIDIA GeForce RTX 4070 Laptop GPU", "NVIDIA GeForce RTX 4070", "NVIDIA GeForce RTX 4060 Ti", "NVIDIA GeForce RTX 4060 Laptop GPU", "NVIDIA GeForce RTX 4060", "NVIDIA GeForce RTX 4050 Laptop GPU",
             "NVIDIA GeForce RTX 3090 Ti", "NVIDIA GeForce RTX 3080 Ti", "NVIDIA GeForce RTX 3080 Laptop GPU", "NVIDIA GeForce RTX 3070 Ti", "NVIDIA GeForce RTX 3070 Laptop GPU", "NVIDIA GeForce RTX 3060 Ti", "NVIDIA GeForce RTX 3060 Laptop GPU", "NVIDIA GeForce RTX 3060", "NVIDIA GeForce RTX 3050 Laptop GPU", "NVIDIA GeForce RTX 3050 Ti Laptop GPU", "NVIDIA GeForce RTX 3050", 
             "NVIDIA GeForce RTX 2080 Super", "NVIDIA GeForce RTX 2070 Super", "NVIDIA GeForce RTX 2060", "NVIDIA GeForce GTX 1660 Super", 
@@ -405,6 +417,10 @@
                 else if (r5) tier = (gen >= 5 || text.includes("Z1")) ? "High" : (gen >= 3 ? "Medium" : "Low");
                 else if (r3) tier = "Low";
                 else if (text.includes("ATHLON") || text.includes("FX-")) tier = "Low";
+            }
+            // Low-end Pentium Gold / Silver support
+            if (text.includes("PENTIUM")) {
+                tier = "Low";
             }
             return { name, tier };
         }
@@ -711,18 +727,6 @@
         }, error => {
             console.error("Firestore loading error:", error);
         });
-
-        // Clear Form Utility
-        function clearForm() {
-            document.getElementById('gameTitle').value = '';
-            document.getElementById('gameBanner').value = '';
-            document.getElementById('gameIcon').value = '';
-            document.getElementById('gameGenre').value = '';
-            document.getElementById('reqCpu').value = 'Medium';
-            document.getElementById('reqGpu').value = 'Medium';
-            document.getElementById('reqRam').value = '8';
-            document.getElementById('gameRating').value = 'Unrated';
-        }
 
         // Save Action Write-To-Firestore [5]
         async function saveNewGame() {
