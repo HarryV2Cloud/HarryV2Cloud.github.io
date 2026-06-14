@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Matcher & Recommender</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-900 text-gray-100 font-sans min-h-screen">
+
+    <!-- Header -->
+    <header class="bg-gray-800 border-b border-gray-700 px-6 py-4 flex justify-between items-center sticky top-0 z-10 shadow-md">
+        <h1 class="text-2xl font-bold text-indigo-400 tracking-wider flex items-center gap-2">
+            <i class="fa-solid fa-gamepad"></i> GameMatcher
+        </h1>
+        <button onclick="openPinModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2 px-4 rounded-lg flex items-center gap-2 transition duration-200">
+            <i class="fa-solid fa-plus"></i> Add Game
+        </button>
+    </header>
+
+    <div class="max-w-7xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-4 gap-6">
+        
+        <!-- Sidebar: Hardware and Filters -->
+        <aside class="space-y-6 lg:col-span-1">
+            
+            <!-- User Hardware Configuration -->
+            <div class="bg-gray-800 p-5 rounded-xl border border-gray-700 shadow-sm">
+                <h2 class="text-lg font-bold text-gray-200 mb-4 border-b border-gray-700 pb-2 flex items-center gap-2">
+                    <i class="fa-solid fa-microchip text-indigo-400"></i> Your Hardware
+                </h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">CPU Tier</label>
+                        <select id="userCpu" onchange="runAnalysis()" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="Low">Low (Dual-Core / Older i3)</option>
+                            <option value="Medium" selected>Medium (Quad-Core / Core i5)</option>
+                            <option value="High">High (Hexa-Core+ / Core i7/i9)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">GPU Tier</label>
+                        <select id="userGpu" onchange="runAnalysis()" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="Low">Low (Integrated / GTX 1050)</option>
+                            <option value="Medium" selected>Medium (GTX 1660 / RTX 3050)</option>
+                            <option value="High">High (RTX 3070 / RX 6700+)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">System RAM</label>
+                        <select id="userRam" onchange="runAnalysis()" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="4">4 GB</option>
+                            <option value="8" selected>8 GB</option>
+                            <option value="16">16 GB</option>
+                            <option value="32">32 GB+</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="bg-gray-800 p-5 rounded-xl border border-gray-700 shadow-sm">
+                <h2 class="text-lg font-bold text-gray-200 mb-4 border-b border-gray-700 pb-2 flex items-center gap-2">
+                    <i class="fa-solid fa-filter text-indigo-400"></i> Search & Filters
+                </h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Search</label>
+                        <input type="text" id="filterSearch" oninput="runAnalysis()" placeholder="Search titles..." class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Genre</label>
+                        <select id="filterGenre" onchange="runAnalysis()" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="All">All Genres</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Compatibility</label>
+                        <select id="filterRun" onchange="runAnalysis()" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="All">All Compatibility</option>
+                            <option value="Playable">Fully Playable</option>
+                            <option value="Minimum">Min. Specs Met</option>
+                            <option value="Incompatible">Unplayable</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+        </aside>
+
+        <!-- Main Display Column -->
+        <main class="lg:col-span-3">
+            <h2 class="text-xl font-bold text-gray-200 mb-4 flex items-center justify-between">
+                <span>Recommended Games</span>
+                <span id="gameCount" class="text-sm font-normal text-gray-400"></span>
+            </h2>
+
+            <div id="gamesGrid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Javascript will load games here -->
+            </div>
+
+            <!-- No Games Found Fallback -->
+            <div id="noGamesView" class="hidden flex flex-col items-center justify-center py-20 text-center bg-gray-800 rounded-xl border border-gray-700 border-dashed">
+                <i class="fa-solid fa-ghost text-5xl text-gray-600 mb-4"></i>
+                <p class="text-gray-400 text-lg">No games added yet, or none match your filters.</p>
+                <p class="text-gray-500 text-sm mt-1">Click the top-right button to start adding games!</p>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal 1: PIN & GitHub Credentials Verification -->
+    <div id="pinModal" class="hidden fixed inset-0 bg-black/75 flex items-center justify-center p-4 z-50">
+        <div class="bg-gray-800 rounded-xl border border-gray-700 max-w-md w-full p-6 shadow-2xl">
+            <h3 class="text-lg font-bold text-gray-100 mb-2">Access Admin Console</h3>
+            <p class="text-xs text-gray-400 mb-4">Input pin 6769 and your GitHub setup details. This configuration is stored safely inside your local browser storage.</p>
+            
+            <div class="space-y-3 mb-4">
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1">PIN</label>
+                    <input type="password" id="adminPin" placeholder="Enter PIN..." class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1">GitHub Username</label>
+                    <input type="text" id="gitUsername" placeholder="e.g. techyUser" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1">GitHub Repository Name</label>
+                    <input type="text" id="gitRepo" placeholder="e.g. game-matcher" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1">GitHub Personal Access Token (PAT)</label>
+                    <input type="password" id="gitToken" placeholder="ghp_..." class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white focus:outline-none">
+                    <p class="text-[10px] text-gray-500 mt-1">Generate a Fine-Grained Token on GitHub with Read & Write access to repository contents.</p>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-3">
+                <button onclick="closePinModal()" class="px-4 py-2 text-gray-400 hover:text-white transition">Cancel</button>
+                <button onclick="verifyCredentials()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2 px-4 rounded-lg transition">Submit</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 2: Add Game Form -->
+    <div id="addGameModal" class="hidden fixed inset-0 bg-black/75 flex items-center justify-center p-4 z-50 overflow-y-auto">
+        <div class="bg-gray-800 rounded-xl border border-gray-700 max-w-lg w-full p-6 shadow-2xl my-8">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-white">Add New Game</h3>
+                <button onclick="closeAddGameModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Game Title</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="gameTitle" placeholder="e.g., Cyberpunk 2077" class="flex-1 bg-gray-700 border border-gray-600 rounded-lg p-2 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <button onclick="runAiReview()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-4 rounded-lg flex items-center gap-1 transition">
+                            <i class="fa-solid fa-robot"></i> AI Review
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Banner Image URL</label>
+                        <input type="text" id="gameBanner" placeholder="https://..." class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Icon URL</label>
+                        <input type="text" id="gameIcon" placeholder="https://..." class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white focus:outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Genre</label>
+                    <input type="text" id="gameGenre" placeholder="e.g., RPG, Shooter" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white focus:outline-none">
+                </div>
+
+                <div class="border-t border-gray-700 pt-4">
+                    <h4 class="text-sm font-bold text-gray-300 mb-3">Adjust Hardware Requirements</h4>
+                    <div class="grid grid-cols-3 gap-3">
+                        <div>
+                            <label class="block text-xs text-gray-400 mb-1">Min CPU</label>
+                            <select id="reqCpu" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white focus:outline-none">
+                                <option value="Low">Low</option>
+                                <option value="Medium">Medium</option>
+                                <option value="High">High</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-400 mb-1">Min GPU</label>
+                            <select id="reqGpu" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white focus:outline-none">
+                                <option value="Low">Low</option>
+                                <option value="Medium">Medium</option>
+                                <option value="High">High</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-400 mb-1">Min RAM (GB)</label>
+                            <input type="number" id="reqRam" value="8" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white focus:outline-none">
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Rating / AI Rating</label>
+                    <input type="text" id="gameRating" value="Unrated" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white focus:outline-none">
+                </div>
+
+                <div class="flex justify-end gap-3 pt-4 border-t border-gray-700">
+                    <button onclick="closeAddGameModal()" class="px-4 py-2 text-gray-400 hover:text-white transition">Cancel</button>
+                    <button onclick="saveNewGame()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2 px-6 rounded-lg transition">Save Game</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Client Logic -->
+    <script>
+        // Loaded dynamically relative to repository path
+        const DATA_FILE = './games.json';
+        let localGames = [];
+
+        // Client-side Mock AI Database
+        const popularGames = [
+            { keywords: ['cyberpunk', '2077'], cpu: 'High', gpu: 'High', ram: 16, rating: '9.0/10' },
+            { keywords: ['witcher', 'wild hunt'], cpu: 'Medium', gpu: 'Medium', ram: 8, rating: '9.5/10' },
+            { keywords: ['gta', 'grand theft auto'], cpu: 'Medium', gpu: 'Medium', ram: 8, rating: '9.5/10' },
+            { keywords: ['elden ring'], cpu: 'High', gpu: 'High', ram: 16, rating: '9.6/10' },
+            { keywords: ['minecraft'], cpu: 'Low', gpu: 'Low', ram: 4, rating: '9.0/10' },
+            { keywords: ['stardew', 'valley'], cpu: 'Low', gpu: 'Low', ram: 2, rating: '9.8/10' },
+            { keywords: ['valorant'], cpu: 'Medium', gpu: 'Low', ram: 8, rating: '8.0/10' },
+            { keywords: ['red dead', 'rdr2'], cpu: 'High', gpu: 'Medium', ram: 12, rating: '9.7/10' },
+            { keywords: ['alan wake', 'aw2'], cpu: 'High', gpu: 'High', ram: 16, rating: '8.9/10' },
+            { keywords: ['fortnite'], cpu: 'Medium', gpu: 'Medium', ram: 8, rating: '8.5/10' }
+        ];
+
+        // Startup Load
+        window.addEventListener('DOMContentLoaded', () => {
+            fetchGames();
+            prefillCredentials();
+        });
+
+        async function fetchGames() {
+            try {
+                const res = await fetch(`${DATA_FILE}?nocache=${new Date().getTime()}`);
+                if (res.ok) {
+                    localGames = await res.json();
+                    populateGenres();
+                    runAnalysis();
+                }
+            } catch (err) {
+                console.warn("Could not find games.json. It will be initialized once you add your first game.", err);
+            }
+        }
+
+        function prefillCredentials() {
+            document.getElementById('gitUsername').value = localStorage.getItem('git_username') || '';
+            document.getElementById('gitRepo').value = localStorage.getItem('git_repo') || '';
+            document.getElementById('gitToken').value = localStorage.getItem('git_token') || '';
+        }
+
+        function populateGenres() {
+            const genres = new Set();
+            localGames.forEach(g => {
+                if (g.genre) genres.add(g.genre.trim());
+            });
+
+            const filterGenreSelect = document.getElementById('filterGenre');
+            filterGenreSelect.innerHTML = '<option value="All">All Genres</option>';
+            genres.forEach(genre => {
+                const opt = document.createElement('option');
+                opt.value = genre;
+                opt.textContent = genre;
+                filterGenreSelect.appendChild(opt);
+            });
+        }
+
+        // Hardware analysis algorithm
+        function getPlayability(game, userHardware) {
+            const tierMap = { 'Low': 1, 'Medium': 2, 'High': 3 };
+            const uCpu = tierMap[userHardware.cpu] || 1;
+            const uGpu = tierMap[userHardware.gpu] || 1;
+            const uRam = userHardware.ram;
+
+            const rCpu = tierMap[game.reqCpu] || 1;
+            const rGpu = tierMap[game.reqGpu] || 1;
+            const rRam = parseInt(game.reqRam) || 4;
+
+            if (uCpu >= rCpu && uGpu >= rGpu && uRam >= rRam) {
+                return { status: "Playable", color: "text-emerald-400 bg-emerald-900/40 border-emerald-800", text: "Optimal Performance" };
+            } else if (uCpu >= rCpu - 1 && uGpu >= rGpu - 1 && uRam >= rRam - 4) {
+                return { status: "Minimum", color: "text-amber-400 bg-amber-900/40 border-amber-800", text: "Minimum Specs / Playable with tweaks" };
+            } else {
+                return { status: "Incompatible", color: "text-red-400 bg-red-900/40 border-red-800", text: "Insufficient Hardware" };
+            }
+        }
+
+        function runAnalysis() {
+            const search = document.getElementById('filterSearch').value.toLowerCase();
+            const genre = document.getElementById('filterGenre').value;
+            const compatibility = document.getElementById('filterRun').value;
+
+            const userHardware = {
+                cpu: document.getElementById('userCpu').value,
+                gpu: document.getElementById('userGpu').value,
+                ram: parseInt(document.getElementById('userRam').value)
+            };
+
+            const grid = document.getElementById('gamesGrid');
+            const noGamesView = document.getElementById('noGamesView');
+            grid.innerHTML = '';
+
+            const filteredGames = localGames.filter(game => {
+                const matchesSearch = game.title.toLowerCase().includes(search);
+                const matchesGenre = (genre === 'All' || game.genre === genre);
+                
+                const playability = getPlayability(game, userHardware);
+                const matchesCompatibility = (compatibility === 'All' || playability.status === compatibility);
+
+                return matchesSearch && matchesGenre && matchesCompatibility;
+            });
+
+            document.getElementById('gameCount').textContent = `Showing ${filteredGames.length} of ${localGames.length}`;
+
+            if (filteredGames.length === 0) {
+                noGamesView.classList.remove('hidden');
+                grid.classList.add('hidden');
+                return;
+            } else {
+                noGamesView.classList.add('hidden');
+                grid.classList.remove('hidden');
+            }
+
+            filteredGames.forEach(game => {
+                const playability = getPlayability(game, userHardware);
+                
+                const card = document.createElement('div');
+                card.className = "bg-gray-800 rounded-xl overflow-hidden border border-gray-700 flex flex-col shadow-md";
+                
+                const bannerSrc = game.banner ? game.banner : 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=400&q=80';
+                const iconSrc = game.icon ? game.icon : 'https://cdn-icons-png.flaticon.com/512/3408/3408506.png';
+
+                card.innerHTML = `
+                    <div class="h-40 bg-cover bg-center relative" style="background-image: url('${bannerSrc}')">
+                        <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-black/50"></div>
+                        <div class="absolute top-3 right-3 bg-gray-900/80 px-2.5 py-1 rounded-md text-xs font-bold flex items-center gap-1">
+                            <i class="fa-solid fa-star text-amber-400"></i> ${game.rating || 'Unrated'}
+                        </div>
+                    </div>
+                    <div class="p-5 flex-1 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center gap-3 mb-3">
+                                <img src="${iconSrc}" class="w-10 h-10 rounded-lg object-cover bg-gray-700 border border-gray-600" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3408/3408506.png'">
+                                <div>
+                                    <h3 class="text-lg font-bold text-white line-clamp-1">${game.title}</h3>
+                                    <span class="text-xs text-indigo-400 bg-indigo-950 px-2 py-0.5 rounded-full">${game.genre || 'General'}</span>
+                                </div>
+                            </div>
+                            <div class="text-xs space-y-1 text-gray-400 mb-4 bg-gray-900/50 p-2.5 rounded-lg">
+                                <div class="font-semibold text-gray-300 mb-1">Requirements:</div>
+                                <div>CPU: <span class="text-gray-200">${game.reqCpu}</span></div>
+                                <div>GPU: <span class="text-gray-200">${game.reqGpu}</span></div>
+                                <div>RAM: <span class="text-gray-200">${game.reqRam} GB</span></div>
+                            </div>
+                        </div>
+                        <div class="border-t border-gray-700 pt-3 flex flex-col items-center">
+                            <span class="w-full text-center text-xs py-1.5 px-3 rounded-lg border font-bold ${playability.color}">
+                                ${playability.status.toUpperCase()}
+                            </span>
+                            <span class="text-[10px] text-gray-500 mt-1">${playability.text}</span>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // Modals Management
+        function openPinModal() {
+            document.getElementById('pinModal').classList.remove('hidden');
+        }
+
+        function closePinModal() {
+            document.getElementById('pinModal').classList.add('hidden');
+            document.getElementById('adminPin').value = '';
+        }
+
+        function verifyCredentials() {
+            const pin = document.getElementById('adminPin').value;
+            const username = document.getElementById('gitUsername').value.trim();
+            const repo = document.getElementById('gitRepo').value.trim();
+            const token = document.getElementById('gitToken').value.trim();
+
+            if (pin !== '6769') {
+                alert("Incorrect PIN configuration. Access Denied.");
+                return;
+            }
+
+            if (!username || !repo || !token) {
+                alert("Please provide all GitHub repository configuration settings.");
+                return;
+            }
+
+            // Stored in the local user's browser only.
+            localStorage.setItem('git_username', username);
+            localStorage.setItem('git_repo', repo);
+            localStorage.setItem('git_token', token);
+
+            closePinModal();
+            openAddGameModal();
+        }
+
+        function openAddGameModal() {
+            document.getElementById('addGameModal').classList.remove('hidden');
+        }
+
+        function closeAddGameModal() {
+            document.getElementById('addGameModal').classList.add('hidden');
+            clearForm();
+        }
+
+        function clearForm() {
+            document.getElementById('gameTitle').value = '';
+            document.getElementById('gameBanner').value = '';
+            document.getElementById('gameIcon').value = '';
+            document.getElementById('gameGenre').value = '';
+            document.getElementById('reqCpu').value = 'Medium';
+            document.getElementById('reqGpu').value = 'Medium';
+            document.getElementById('reqRam').value = '8';
+            document.getElementById('gameRating').value = 'Unrated';
+        }
+
+        // Client-side simulated AI Review 
+        function runAiReview() {
+            const title = document.getElementById('gameTitle').value.trim();
+            if (!title) {
+                alert("Please type a game title first.");
+                return;
+            }
+
+            const lowerTitle = title.toLowerCase();
+            const matched = popularGames.find(g => 
+                g.keywords.some(keyword => lowerTitle.includes(keyword))
+            );
+
+            if (matched) {
+                document.getElementById('reqCpu').value = matched.cpu;
+                document.getElementById('reqGpu').value = matched.gpu;
+                document.getElementById('reqRam').value = matched.ram;
+                document.getElementById('gameRating').value = matched.rating;
+                alert(`AI autofilled requirements for "${title}". Review and edit them manually below if incorrect.`);
+            } else {
+                document.getElementById('reqCpu').value = 'Medium';
+                document.getElementById('reqGpu').value = 'Medium';
+                document.getElementById('reqRam').value = '8';
+                document.getElementById('gameRating').value = 'Unrated';
+                alert(`"${title}" was not recognized. Requirements default to "Unrated" with medium specifications. Adjust manually below.`);
+            }
+        }
+
+        // Commits directly to your GitHub Repository from the browser
+        async function saveNewGame() {
+            const game = {
+                title: document.getElementById('gameTitle').value.trim(),
+                banner: document.getElementById('gameBanner').value.trim(),
+                icon: document.getElementById('gameIcon').value.trim(),
+                genre: document.getElementById('gameGenre').value.trim() || 'General',
+                reqCpu: document.getElementById('reqCpu').value,
+                reqGpu: document.getElementById('reqGpu').value,
+                reqRam: parseInt(document.getElementById('reqRam').value) || 8,
+                rating: document.getElementById('gameRating').value.trim() || 'Unrated'
+            };
+
+            if (!game.title) {
+                alert("A title is required.");
+                return;
+            }
+
+            const username = localStorage.getItem('git_username');
+            const repo = localStorage.getItem('git_repo');
+            const token = localStorage.getItem('git_token');
+
+            if (!username || !repo || !token) {
+                alert("Missing GitHub settings. Please log back in.");
+                return;
+            }
+
+            const path = "games.json";
+            const apiEndpoint = `https://api.github.com/repos/${username}/${repo}/contents/${path}`;
+
+            try {
+                // Fetch existing games list to read SHA hash and content
+                const getRes = await fetch(apiEndpoint, {
+                    headers: {
+                        'Accept': 'application/vnd.github+json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                let currentGames = [];
+                let sha = null;
+
+                if (getRes.status === 200) {
+                    const fileData = await getRes.json();
+                    sha = fileData.sha;
+                    // Safely decode UTF-8 base64
+                    const decodedContent = decodeURIComponent(escape(atob(fileData.content.replace(/\s/g, ''))));
+                    currentGames = JSON.parse(decodedContent);
+                } else if (getRes.status === 404) {
+                    currentGames = [];
+                } else {
+                    const text = await getRes.text();
+                    throw new Error(`Failed to download existing directory file: ${text}`);
+                }
+
+                // Add game to array
+                currentGames.push(game);
+
+                // Encode the string back to UTF-8 Base64
+                const updatedJson = JSON.stringify(currentGames, null, 2);
+                const encodedContent = btoa(unescape(encodeURIComponent(updatedJson)));
+
+                // Write the file back to the repository
+                const putRes = await fetch(apiEndpoint, {
+                    method: 'PUT',
+                    headers: {
+                        'Accept': 'application/vnd.github+json',
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: `Add game: ${game.title}`,
+                        content: encodedContent,
+                        sha: sha || undefined
+                    })
+                });
+
+                if (putRes.ok) {
+                    alert("Game added successfully! GitHub will take about 30 seconds to rebuild and display changes to visitors.");
+                    closeAddGameModal();
+                    
+                    // Instantly show the change to you without forcing a full refresh
+                    localGames = currentGames;
+                    populateGenres();
+                    runAnalysis();
+                } else {
+                    const errTxt = await putRes.text();
+                    alert(`Save failed: ${errTxt}`);
+                }
+            } catch (err) {
+                console.error(err);
+                alert(`Error saving to GitHub: ${err.message}`);
+            }
+        }
+    </script>
+</body>
+</html>
