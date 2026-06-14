@@ -100,21 +100,21 @@
                     <!-- CPU Input with dynamic suggestions -->
                     <div class="relative">
                         <label class="block text-sm text-gray-400 mb-1">Type CPU Model</label>
-                        <input type="text" id="userCpuInput" oninput="showSuggestions('cpu')" onfocus="showSuggestions('cpu')" placeholder="e.g. Intel Core i7-12700K" autocomplete="off" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                        <input type="text" id="userCpuInput" oninput="showSuggestions('cpu')" onfocus="showSuggestions('cpu')" placeholder="e.g. Intel Core Ultra 7 155H" autocomplete="off" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
                         <div id="cpuSuggestions" class="hidden absolute left-0 right-0 top-full mt-1 max-h-48 overflow-y-auto bg-gray-800 border border-gray-700 rounded-lg z-20 shadow-xl divide-y divide-gray-700/50 suggestions-scrollbar"></div>
                     </div>
                     
                     <!-- GPU Input with dynamic suggestions -->
                     <div class="relative">
                         <label class="block text-sm text-gray-400 mb-1">Type GPU Model</label>
-                        <input type="text" id="userGpuInput" oninput="showSuggestions('gpu')" onfocus="showSuggestions('gpu')" placeholder="e.g. NVIDIA GeForce RTX 3060" autocomplete="off" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                        <input type="text" id="userGpuInput" oninput="showSuggestions('gpu')" onfocus="showSuggestions('gpu')" placeholder="e.g. AMD Radeon 780M" autocomplete="off" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
                         <div id="gpuSuggestions" class="hidden absolute left-0 right-0 top-full mt-1 max-h-48 overflow-y-auto bg-gray-800 border border-gray-700 rounded-lg z-20 shadow-xl divide-y divide-gray-700/50 suggestions-scrollbar"></div>
                     </div>
                     
                     <!-- RAM Input with dynamic suggestions -->
                     <div class="relative">
                         <label class="block text-sm text-gray-400 mb-1">Type RAM Module</label>
-                        <input type="text" id="userRamInput" oninput="showSuggestions('ram')" onfocus="showSuggestions('ram')" placeholder="e.g. 16GB DDR4 3200MHz" autocomplete="off" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                        <input type="text" id="userRamInput" oninput="showSuggestions('ram')" onfocus="showSuggestions('ram')" placeholder="e.g. 16GB DDR5" autocomplete="off" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
                         <div id="ramSuggestions" class="hidden absolute left-0 right-0 top-full mt-1 max-h-48 overflow-y-auto bg-gray-800 border border-gray-700 rounded-lg z-20 shadow-xl divide-y divide-gray-700/50 suggestions-scrollbar"></div>
                     </div>
 
@@ -299,35 +299,41 @@
         let currentUser = null;
         let activeAuthTab = 'login'; // 'login' or 'register'
 
-        // Hardware Library Lists
+        // Expanded Hardware Library Lists (Extensive Desktop & Mobile/Laptop options)
         const cpuList = [
-            "Intel Core i9-14900K", "Intel Core i9-13900K", "Intel Core i7-14700K", "Intel Core i7-13700K", "Intel Core i7-12700K", 
-            "Intel Core i5-14600K", "Intel Core i5-13600K", "Intel Core i5-12400F", "Intel Core i5-10400F", "Intel Core i5-8400", 
-            "Intel Core i3-14100", "Intel Core i3-12100F", "Intel Core i3-10100", "Intel Core i7-8700K", "Intel Core i7-4770K",
-            "AMD Ryzen 9 7950X3D", "AMD Ryzen 9 5900X", "AMD Ryzen 7 7800X3D", "AMD Ryzen 7 5800X3D", "AMD Ryzen 7 5700X", 
-            "AMD Ryzen 5 7600X", "AMD Ryzen 5 5600X", "AMD Ryzen 5 3600", "AMD Ryzen 5 2600", "AMD Ryzen 3 3100", 
-            "AMD Athlon 3000G", "Apple M3 Max", "Apple M2 Pro", "Apple M1"
+            "Intel Core Ultra 9 185H", "Intel Core Ultra 7 258V", "Intel Core Ultra 7 155H", "Intel Core Ultra 5 226V", "Intel Core Ultra 5 125H",
+            "Intel Core i9-14900HX", "Intel Core i9-14900K", "Intel Core i9-13900K", "Intel Core i9-13980HX", "Intel Core i9-12900H",
+            "Intel Core i7-14700HX", "Intel Core i7-14700K", "Intel Core i7-13700H", "Intel Core i7-13700K", "Intel Core i7-12700H", "Intel Core i7-12700K", 
+            "Intel Core i5-14600K", "Intel Core i5-13600K", "Intel Core i5-13500H", "Intel Core i5-12500H", "Intel Core i5-12400F", "Intel Core i5-10400F", "Intel Core i5-8400", 
+            "Intel Core i3-14100", "Intel Core i3-12100F", "Intel Core i3-10100", "Intel Core i7-11800H", "Intel Core i7-1165G7", "Intel Core i5-1135G7", "Intel Core i7-10750H",
+            "Intel Core i5-10300H", "Intel Core i7-8700K", "Intel Core i7-4770K",
+            "AMD Ryzen AI 9 HX 370", "AMD Ryzen AI 9 365", "AMD Ryzen 9 8945HS", "AMD Ryzen 9 7945HX", "AMD Ryzen 9 7950X3D", "AMD Ryzen 9 5900X", "AMD Ryzen 9 6900HX",
+            "AMD Ryzen 7 8845HS", "AMD Ryzen 7 8840U", "AMD Ryzen 7 7840HS", "AMD Ryzen 7 7840U", "AMD Ryzen 7 7800X3D", "AMD Ryzen 7 6800H", "AMD Ryzen 7 6800U", "AMD Ryzen 7 5800H", "AMD Ryzen 7 5800X3D", "AMD Ryzen 7 5700U",
+            "AMD Ryzen 5 7640HS", "AMD Ryzen 5 7600X", "AMD Ryzen 5 7540U", "AMD Ryzen 5 6600H", "AMD Ryzen 5 5600H", "AMD Ryzen 5 5600X", "AMD Ryzen 5 5500U", "AMD Ryzen 5 3600", "AMD Ryzen 5 2600", "AMD Ryzen 3 3100", 
+            "AMD Ryzen Z1 Extreme", "AMD Ryzen Z1", "Qualcomm Snapdragon X Elite X1E-84-100", "Qualcomm Snapdragon X Elite X1E-78-100", "Qualcomm Snapdragon X Plus X1P-64-100",
+            "Apple M3 Max", "Apple M3 Pro", "Apple M3", "Apple M2 Max", "Apple M2 Pro", "Apple M2", "Apple M1 Max", "Apple M1 Pro", "Apple M1"
         ];
 
         const gpuList = [
-            "NVIDIA GeForce RTX 4090", "NVIDIA GeForce RTX 4080 Super", "NVIDIA GeForce RTX 4070 Ti Super", "NVIDIA GeForce RTX 4070", 
-            "NVIDIA GeForce RTX 4060 Ti", "NVIDIA GeForce RTX 4060", "NVIDIA GeForce RTX 3090 Ti", "NVIDIA GeForce RTX 3080 Ti", 
-            "NVIDIA GeForce RTX 3070 Ti", "NVIDIA GeForce RTX 3060 Ti", "NVIDIA GeForce RTX 3060", "NVIDIA GeForce RTX 3050", 
+            "NVIDIA GeForce RTX 4090", "NVIDIA GeForce RTX 4090 Laptop GPU", "NVIDIA GeForce RTX 4080 Super", "NVIDIA GeForce RTX 4080 Laptop GPU", 
+            "NVIDIA GeForce RTX 4070 Ti Super", "NVIDIA GeForce RTX 4070 Laptop GPU", "NVIDIA GeForce RTX 4070", "NVIDIA GeForce RTX 4060 Ti", "NVIDIA GeForce RTX 4060 Laptop GPU", "NVIDIA GeForce RTX 4060", "NVIDIA GeForce RTX 4050 Laptop GPU",
+            "NVIDIA GeForce RTX 3090 Ti", "NVIDIA GeForce RTX 3080 Ti", "NVIDIA GeForce RTX 3080 Laptop GPU", "NVIDIA GeForce RTX 3070 Ti", "NVIDIA GeForce RTX 3070 Laptop GPU", "NVIDIA GeForce RTX 3060 Ti", "NVIDIA GeForce RTX 3060 Laptop GPU", "NVIDIA GeForce RTX 3060", "NVIDIA GeForce RTX 3050 Laptop GPU", "NVIDIA GeForce RTX 3050 Ti Laptop GPU", "NVIDIA GeForce RTX 3050", 
             "NVIDIA GeForce RTX 2080 Super", "NVIDIA GeForce RTX 2070 Super", "NVIDIA GeForce RTX 2060", "NVIDIA GeForce GTX 1660 Super", 
-            "NVIDIA GeForce GTX 1660 Ti", "NVIDIA GeForce GTX 1650 Super", "NVIDIA GeForce GTX 1080 Ti", "NVIDIA GeForce GTX 1070", 
-            "NVIDIA GeForce GTX 1060 6GB", "NVIDIA GeForce GTX 1050 Ti", "AMD Radeon RX 7900 XTX", "AMD Radeon RX 7800 XT", 
-            "AMD Radeon RX 7700 XT", "AMD Radeon RX 7600 XT", "AMD Radeon RX 6950 XT", "AMD Radeon RX 6800 XT", 
-            "AMD Radeon RX 6700 XT", "AMD Radeon RX 6600 XT", "AMD Radeon RX 5700 XT", "AMD Radeon RX 580 8GB", 
-            "AMD Radeon RX 570 4GB", "Intel Arc A770", "Intel Arc A750", "Intel Iris Xe Graphics", "Intel UHD Graphics 770", 
-            "AMD Radeon Graphics (Integrated)"
+            "NVIDIA GeForce GTX 1660 Ti", "NVIDIA GeForce GTX 1650 Super", "NVIDIA GeForce GTX 1650 Laptop GPU", "NVIDIA GeForce GTX 1080 Ti", "NVIDIA GeForce GTX 1070", 
+            "NVIDIA GeForce GTX 1060 6GB", "NVIDIA GeForce GTX 1050 Ti", "NVIDIA GeForce MX550", "NVIDIA GeForce MX450",
+            "AMD Radeon RX 7900 XTX", "AMD Radeon RX 7800 XT", "AMD Radeon RX 7700 XT", "AMD Radeon RX 7600 XT", "AMD Radeon RX 6950 XT", "AMD Radeon RX 6800 XT", 
+            "AMD Radeon RX 6700 XT", "AMD Radeon RX 6600 XT", "AMD Radeon RX 5700 XT", "AMD Radeon RX 580 8GB", "AMD Radeon RX 570 4GB", 
+            "AMD Radeon 890M", "AMD Radeon 880M", "AMD Radeon 780M", "AMD Radeon 760M", "AMD Radeon 740M", "AMD Radeon 680M", "AMD Radeon 660M", "AMD Radeon RX Vega 8", "AMD Radeon RX Vega 7",
+            "Intel Arc Graphics (Core Ultra)", "Intel Iris Xe Graphics", "Intel UHD Graphics 770", "Intel UHD Graphics 620", "Intel UHD Graphics (Xe)", "Intel Arc A770", "Intel Arc A750", 
+            "Qualcomm Adreno GPU (X Elite)", "Apple M3 GPU", "Apple M2 GPU", "Apple M1 GPU"
         ];
 
         const ramList = [
             "4GB DDR3 1600MHz", "8GB DDR3 1600MHz", "16GB DDR3 1600MHz", "8GB DDR4 2400MHz", "8GB DDR4 2666MHz", 
             "8GB DDR4 3200MHz", "16GB DDR4 2666MHz", "16GB DDR4 3000MHz", "16GB DDR4 3200MHz", "16GB DDR4 3600MHz", 
-            "32GB DDR4 3200MHz", "32GB DDR4 3600MHz", "16GB DDR5 4800MHz", "16GB DDR5 5200MHz", "16GB DDR5 5600MHz", 
+            "32GB DDR4 3200MHz", "32GB DDR4 3600MHz", "8GB DDR5 4800MHz", "16GB DDR5 4800MHz", "16GB DDR5 5200MHz", "16GB DDR5 5600MHz", 
             "16GB DDR5 6000MHz", "32GB DDR5 4800MHz", "32GB DDR5 5200MHz", "32GB DDR5 5600MHz", "32GB DDR5 6000MHz", 
-            "32GB DDR5 6400MHz", "64GB DDR5 6000MHz"
+            "32GB DDR5 6400MHz", "64GB DDR5 6000MHz", "16GB LPDDR5 6400MHz", "32GB LPDDR5X 7500MHz"
         ];
 
         // Mock Library for AI Autofill Heuristic
@@ -344,14 +350,25 @@
             { keywords: ['fortnite'], cpu: 'Medium', gpu: 'Medium', ram: 8, rating: '8.5/10' }
         ];
 
-        // Hardware Parsers
+        // Hardware Parsers (Enhanced for ARM, Intel Core Ultra, AMD Ryzen AI & high-performance iGPUs)
         function parseCPU(name) {
             const text = name.trim().toUpperCase();
             if (!text) return { name: "Awaiting Hardware Model Data", tier: "Medium" };
 
             let tier = "Medium";
             
-            if (text.includes("INTEL") || text.includes("CORE") || text.includes("I3") || text.includes("I5") || text.includes("I7") || text.includes("I9")) {
+            // Qualcomm / Snapdragon ARM CPUs
+            if (text.includes("SNAPDRAGON") || text.includes("QUALCOMM")) {
+                if (text.includes("ELITE")) tier = "High";
+                else tier = "Medium"; // Snapdragon X Plus
+            }
+            // Intel Core Ultra 
+            else if (text.includes("CORE ULTRA") || text.includes("ULTRA 9") || text.includes("ULTRA 7") || text.includes("ULTRA 5")) {
+                if (text.includes("ULTRA 9") || text.includes("ULTRA 7")) tier = "High";
+                else tier = "Medium"; // Ultra 5
+            }
+            // Standard Intel Core Series (Desktop + Laptop mobile modifiers)
+            else if (text.includes("INTEL") || text.includes("CORE") || text.includes("I3") || text.includes("I5") || text.includes("I7") || text.includes("I9")) {
                 const i9Match = text.includes("I9");
                 const i7Match = text.includes("I7");
                 const i5Match = text.includes("I5");
@@ -371,10 +388,11 @@
                 else if (i3Match) tier = (gen >= 12) ? "Medium" : "Low";
                 else if (text.includes("PENTIUM") || text.includes("CELERON") || text.includes("ATOM")) tier = "Low";
             }
-            else if (text.includes("AMD") || text.includes("RYZEN") || text.includes("ATHLON")) {
-                const r9 = text.includes("RYZEN 9") || text.includes("R9");
-                const r7 = text.includes("RYZEN 7") || text.includes("R7");
-                const r5 = text.includes("RYZEN 5") || text.includes("R5");
+            // AMD Ryzen (including Ryzen AI handheld & laptop chips)
+            else if (text.includes("AMD") || text.includes("RYZEN") || text.includes("ATHLON") || text.includes("Z1")) {
+                const r9 = text.includes("RYZEN 9") || text.includes("R9") || text.includes("AI 9");
+                const r7 = text.includes("RYZEN 7") || text.includes("R7") || text.includes("Z1 EXTREME");
+                const r5 = text.includes("RYZEN 5") || text.includes("R5") || text.includes("Z1");
                 const r3 = text.includes("RYZEN 3") || text.includes("R3");
                 
                 const genMatch = text.match(/\b\d{4}\b/);
@@ -383,8 +401,8 @@
                     gen = parseInt(genMatch[0].charAt(0)); 
                 }
                 
-                if (r9 || r7) tier = (gen >= 5) ? "High" : "Medium";
-                else if (r5) tier = (gen >= 5) ? "High" : (gen >= 3 ? "Medium" : "Low");
+                if (r9 || r7) tier = (gen >= 5 || text.includes("AI 9") || text.includes("Z1")) ? "High" : "Medium";
+                else if (r5) tier = (gen >= 5 || text.includes("Z1")) ? "High" : (gen >= 3 ? "Medium" : "Low");
                 else if (r3) tier = "Low";
                 else if (text.includes("ATHLON") || text.includes("FX-")) tier = "Low";
             }
@@ -398,22 +416,27 @@
             let tier = "Medium";
             let isIntegrated = false;
 
-            if (text.includes("INTEGRATED") || text.includes("INTEL HD") || text.includes("UHD") || text.includes("IRIS") || text.includes("VEGA") || text.includes("RADEON GRAPHICS") || text.includes("APU") || text.includes("SHARED")) {
+            // Check Integrated & Mobile Laptop APUs
+            if (text.includes("INTEGRATED") || text.includes("INTEL HD") || text.includes("UHD") || text.includes("IRIS") || text.includes("VEGA") || text.includes("RADEON GRAPHICS") || text.includes("APU") || text.includes("SHARED") || text.includes("INTEL GRAPHICS") || text.includes("ADRENO")) {
                 isIntegrated = true;
                 tier = "Low";
-                if (text.includes("780M") || text.includes("680M")) {
+                
+                // Classify high-performing modern iGPUs to Medium tier
+                if (text.includes("890M") || text.includes("880M") || text.includes("780M") || text.includes("680M") || text.includes("ARC") || text.includes("XE GRAPHICS")) {
                     tier = "Medium";
                 }
             }
+            // Check NVIDIA
             else if (text.includes("NVIDIA") || text.includes("GEFORCE") || text.includes("GTX") || text.includes("RTX")) {
-                const rtx40 = text.includes("RTX 40") || text.includes("4060") || text.includes("4070") || text.includes("4080") || text.includes("4090");
-                const rtx30 = text.includes("RTX 30");
+                const rtx40 = text.includes("RTX 40") || text.includes("4060") || text.includes("4070") || text.includes("4080") || text.includes("4090") || text.includes("4050");
+                const rtx30 = text.includes("RTX 30") || text.includes("3050") || text.includes("3060") || text.includes("3070") || text.includes("3080");
                 const rtx20 = text.includes("RTX 20");
                 const gtx16 = text.includes("GTX 16") || text.includes("1660") || text.includes("1650");
                 const gtx10 = text.includes("GTX 10") || text.includes("1080") || text.includes("1070") || text.includes("1060") || text.includes("1050");
                 
                 if (rtx40) {
-                    tier = "High";
+                    if (text.includes("4050")) tier = "Medium";
+                    else tier = "High";
                 } else if (rtx30) {
                     if (text.includes("3050") || text.includes("3060")) tier = "Medium";
                     else tier = "High";
@@ -429,6 +452,7 @@
                     tier = "Low";
                 }
             }
+            // Check AMD Radeon discrete
             else if (text.includes("AMD") || text.includes("RADEON") || text.includes("RX")) {
                 const rx7 = text.includes("RX 7");
                 const rx6 = text.includes("RX 6");
@@ -437,7 +461,7 @@
                 if (rx7) {
                     tier = "High";
                 } else if (rx6) {
-                    if (text.includes("6600") || text.includes("6500")) tier = "Medium";
+                    if (text.includes("6600") || text.includes("6500") || text.includes("6400")) tier = "Medium";
                     else tier = "High";
                 } else if (rx5) {
                     if (text.includes("580") || text.includes("590") || text.includes("5500") || text.includes("5600")) tier = "Medium";
@@ -688,6 +712,18 @@
             console.error("Firestore loading error:", error);
         });
 
+        // Clear Form Utility
+        function clearForm() {
+            document.getElementById('gameTitle').value = '';
+            document.getElementById('gameBanner').value = '';
+            document.getElementById('gameIcon').value = '';
+            document.getElementById('gameGenre').value = '';
+            document.getElementById('reqCpu').value = 'Medium';
+            document.getElementById('reqGpu').value = 'Medium';
+            document.getElementById('reqRam').value = '8';
+            document.getElementById('gameRating').value = 'Unrated';
+        }
+
         // Save Action Write-To-Firestore [5]
         async function saveNewGame() {
             const game = {
@@ -908,6 +944,7 @@
         window.showSuggestions = showSuggestions;
         window.selectSuggestion = selectSuggestion;
         window.hideSuggestions = hideSuggestions;
+        window.clearForm = clearForm;
 
         // Restore saved settings on load
         document.getElementById('userCpuInput').value = localStorage.getItem('raw_cpu_val') || '';
