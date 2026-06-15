@@ -8,19 +8,60 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* Dynamic Theme Variable Mapping */
+        :root {
+            --theme-bg: #111827; /* gray-900 */
+            --theme-card: #1f2937; /* gray-800 */
+            --theme-border: #374151; /* gray-700 */
+            --theme-accent: #4f46e5; /* indigo-600 */
+            --theme-accent-hover: #4338ca; /* indigo-700 */
+            --theme-accent-text: #818cf8; /* indigo-400 */
+            --theme-text: #f3f4f6; /* gray-100 */
+            --theme-text-muted: #9ca3af; /* gray-400 */
+        }
+        .theme-cyber {
+            --theme-bg: #020617; /* slate-950 */
+            --theme-card: #0f172a; /* slate-900 */
+            --theme-border: #f43f5e; /* rose-500 */
+            --theme-accent: #d946ef; /* fuchsia-500 */
+            --theme-accent-hover: #c084fc; /* purple-400 */
+            --theme-accent-text: #f472b6; /* pink-400 */
+            --theme-text: #fdf4ff; /* fuchsia-50 */
+            --theme-text-muted: #fda4af; /* rose-300 */
+        }
+        .theme-emerald {
+            --theme-bg: #022c22; /* emerald-950 */
+            --theme-card: #064e3b; /* emerald-900 */
+            --theme-border: #059669; /* emerald-600 */
+            --theme-accent: #10b981; /* emerald-500 */
+            --theme-accent-hover: #34d399; /* emerald-400 */
+            --theme-accent-text: #6ee7b7; /* emerald-300 */
+            --theme-text: #ecfdf5; /* emerald-50 */
+            --theme-text-muted: #a7f3d0; /* emerald-300 */
+        }
+
+        /* Application Style Mappings */
+        .dynamic-bg { background-color: var(--theme-bg); color: var(--theme-text); }
+        .dynamic-card { background-color: var(--theme-card); border-color: var(--theme-border); }
+        .dynamic-border { border-color: var(--theme-border); }
+        .dynamic-accent-btn { background-color: var(--theme-accent); color: #fff; }
+        .dynamic-accent-btn:hover { background-color: var(--theme-accent-hover); }
+        .dynamic-accent-text { color: var(--theme-accent-text); }
+        .dynamic-text-muted { color: var(--theme-text-muted); }
+
         .suggestions-scrollbar::-webkit-scrollbar { width: 6px; }
         .suggestions-scrollbar::-webkit-scrollbar-track { background: #1f2937; border-radius: 8px; }
         .suggestions-scrollbar::-webkit-scrollbar-thumb { background: #4f46e5; border-radius: 8px; }
     </style>
 </head>
-<body id="themeBody" class="bg-gray-900 text-gray-100 font-sans min-h-screen transition-colors duration-300">
+<body id="themeBody" class="font-sans min-h-screen transition-colors duration-300 dynamic-bg">
 
     <!-- Header -->
-    <header class="bg-gray-800 border-b border-gray-700 px-6 py-4 flex justify-between items-center sticky top-0 z-10 shadow-md">
-        <h1 class="text-2xl font-bold text-indigo-400 tracking-wider flex items-center gap-2">
+    <header class="dynamic-card border-b px-6 py-4 flex justify-between items-center sticky top-0 z-10 shadow-md">
+        <h1 class="text-2xl font-bold dynamic-accent-text tracking-wider flex items-center gap-2">
             <i class="fa-solid fa-gamepad"></i> GameMatcher
         </h1>
-        <button id="addGameBtn" onclick="openPinModal('add')" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2 px-4 rounded-lg flex items-center gap-2 transition duration-200">
+        <button id="addGameBtn" onclick="openPinModal('add')" class="dynamic-accent-btn font-semibold py-2 px-4 rounded-lg flex items-center gap-2 transition duration-200">
             <i class="fa-solid fa-plus"></i> Add Game
         </button>
     </header>
@@ -31,78 +72,78 @@
         <aside class="space-y-6 lg:col-span-1">
             
             <!-- Auth Panel -->
-            <div class="bg-gray-800 p-5 rounded-xl border border-gray-700 shadow-sm">
-                <h2 class="text-lg font-bold text-gray-200 mb-3 border-b border-gray-700 pb-2 flex items-center gap-2">
-                    <i class="fa-solid fa-user-shield text-indigo-400"></i> Account Access
+            <div class="dynamic-card p-5 rounded-xl border shadow-sm">
+                <h2 class="text-lg font-bold mb-3 border-b pb-2 dynamic-border flex items-center gap-2">
+                    <i class="fa-solid fa-user-shield dynamic-accent-text"></i> Account Access
                 </h2>
                 <div id="loggedOutView" class="space-y-3">
-                    <div class="flex border-b border-gray-700 text-sm">
-                        <button id="tabLogin" onclick="toggleAuthTab('login')" class="flex-1 py-2 text-center font-bold text-indigo-400 border-b-2 border-indigo-500">Log In</button>
-                        <button id="tabRegister" onclick="toggleAuthTab('register')" class="flex-1 py-2 text-center font-bold text-gray-400 border-b-2 border-transparent">Sign Up</button>
+                    <div class="flex border-b text-sm dynamic-border">
+                        <button id="tabLogin" onclick="toggleAuthTab('login')" class="flex-1 py-2 text-center font-bold dynamic-accent-text border-b-2 border-current">Log In</button>
+                        <button id="tabRegister" onclick="toggleAuthTab('register')" class="flex-1 py-2 text-center font-bold dynamic-text-muted border-b-2 border-transparent">Sign Up</button>
                     </div>
                     <form id="authForm" onsubmit="handleAuthSubmit(event)" class="space-y-3 text-xs">
-                        <input type="email" id="authEmail" required placeholder="Email" class="w-full bg-gray-700 border border-gray-600 rounded p-2.5 text-white outline-none">
-                        <input type="password" id="authPassword" required placeholder="Password" class="w-full bg-gray-700 border border-gray-600 rounded p-2.5 text-white outline-none">
-                        <button type="submit" id="authSubmitBtn" class="w-full bg-indigo-600 text-white font-semibold py-2 rounded text-sm">Log In</button>
+                        <input type="email" id="authEmail" required placeholder="Email" class="w-full bg-gray-950/40 border dynamic-border rounded p-2.5 text-white outline-none">
+                        <input type="password" id="authPassword" required placeholder="Password" class="w-full bg-gray-950/40 border dynamic-border rounded p-2.5 text-white outline-none">
+                        <button type="submit" id="authSubmitBtn" class="w-full dynamic-accent-btn font-semibold py-2 rounded text-sm transition">Log In</button>
                     </form>
                 </div>
                 <div id="loggedInView" class="hidden flex flex-col gap-4">
                     <div class="flex items-center gap-3">
-                        <img id="userAvatar" src="" class="w-10 h-10 rounded-full border border-gray-600 object-cover bg-gray-700">
+                        <img id="userAvatar" src="" class="w-10 h-10 rounded-full border object-cover bg-gray-750 dynamic-border">
                         <div class="truncate">
-                            <p id="userName" class="text-sm font-bold text-white leading-tight truncate"></p>
-                            <p id="userPhone" class="text-[10px] text-gray-400 mt-0.5 truncate"></p>
+                            <p id="userName" class="text-sm font-bold truncate"></p>
+                            <p id="userPhone" class="text-[10px] dynamic-text-muted mt-0.5 truncate"></p>
                         </div>
                     </div>
-                    <button onclick="signOutUser()" class="w-full bg-gray-700 hover:bg-gray-600 text-xs text-red-400 hover:text-red-300 font-semibold py-2 rounded border border-gray-600 transition">Sign Out</button>
+                    <button onclick="signOutUser()" class="w-full bg-gray-700/50 hover:bg-gray-600/50 text-xs text-red-400 font-semibold py-2 rounded border dynamic-border transition">Sign Out</button>
                 </div>
             </div>
 
-            <!-- Specs & Dynamic Turbo Clock -->
-            <div class="bg-gray-800 p-5 rounded-xl border border-gray-700 shadow-sm">
-                <h2 class="text-lg font-bold text-gray-200 mb-4 border-b border-gray-700 pb-2 flex items-center gap-2">
-                    <i class="fa-solid fa-microchip text-indigo-400"></i> Specs Engine
+            <!-- Specs Engine -->
+            <div class="dynamic-card p-5 rounded-xl border shadow-sm">
+                <h2 class="text-lg font-bold mb-4 border-b pb-2 dynamic-border flex items-center gap-2">
+                    <i class="fa-solid fa-microchip dynamic-accent-text"></i> Specs Engine
                 </h2>
                 <div class="space-y-4">
                     <div class="relative">
-                        <label class="block text-xs text-gray-400 mb-1">CPU Model</label>
+                        <label class="block text-xs dynamic-text-muted mb-1">CPU Model</label>
                         <div class="flex gap-1.5">
-                            <input type="text" id="userCpuInput" oninput="showSuggestions('cpu')" onfocus="showSuggestions('cpu')" placeholder="Pentium, Core, Ryzen..." autocomplete="off" class="flex-1 bg-gray-700 border border-gray-600 rounded-lg p-2 text-white text-xs outline-none">
+                            <input type="text" id="userCpuInput" oninput="showSuggestions('cpu')" onfocus="showSuggestions('cpu')" placeholder="Pentium, Core, Ryzen..." autocomplete="off" class="flex-1 bg-gray-955 border dynamic-border bg-gray-950/40 rounded-lg p-2 text-white text-xs outline-none">
                             <button id="turboBtn" onclick="toggleTurbo()" class="hidden bg-amber-600 hover:bg-amber-500 text-white text-[10px] px-2 rounded-lg font-bold transition">⚡ Turbo</button>
                         </div>
-                        <div id="cpuSuggestions" class="hidden absolute left-0 right-0 top-full mt-1 max-h-48 overflow-y-auto bg-gray-800 border border-gray-700 rounded-lg z-20 suggestions-scrollbar shadow-2xl divide-y divide-gray-700/50"></div>
+                        <div id="cpuSuggestions" class="hidden absolute left-0 right-0 top-full mt-1 max-h-48 overflow-y-auto bg-gray-800 border dynamic-border rounded-lg z-20 suggestions-scrollbar shadow-2xl divide-y divide-gray-700/50"></div>
                     </div>
                     <div class="grid grid-cols-2 gap-2">
                         <div>
-                            <label class="block text-xs text-gray-400 mb-1">CPU GHz Base</label>
-                            <input type="number" step="0.1" id="userCpuGhz" oninput="onHardwareInput()" value="2.0" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white text-xs outline-none">
+                            <label class="block text-xs dynamic-text-muted mb-1">CPU GHz Base</label>
+                            <input type="number" step="0.1" id="userCpuGhz" oninput="onHardwareInput()" value="2.0" class="w-full bg-gray-950/40 border dynamic-border rounded-lg p-2 text-white text-xs outline-none">
                         </div>
                         <div>
-                            <label class="block text-xs text-gray-400 mb-1">GPU VRAM (GB)</label>
-                            <input type="number" id="userGpuVram" oninput="onHardwareInput()" value="2" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white text-xs outline-none">
+                            <label class="block text-xs dynamic-text-muted mb-1">GPU VRAM (GB)</label>
+                            <input type="number" id="userGpuVram" oninput="onHardwareInput()" value="2" class="w-full bg-gray-950/40 border dynamic-border rounded-lg p-2 text-white text-xs outline-none">
                         </div>
                     </div>
                     <div class="relative">
-                        <label class="block text-xs text-gray-400 mb-1">GPU Model</label>
-                        <input type="text" id="userGpuInput" oninput="showSuggestions('gpu')" onfocus="showSuggestions('gpu')" placeholder="Nvidia, AMD, UHD..." autocomplete="off" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white text-xs outline-none">
-                        <div id="gpuSuggestions" class="hidden absolute left-0 right-0 top-full mt-1 max-h-48 overflow-y-auto bg-gray-800 border border-gray-700 rounded-lg z-20 suggestions-scrollbar shadow-2xl divide-y divide-gray-700/50"></div>
+                        <label class="block text-xs dynamic-text-muted mb-1">GPU Model</label>
+                        <input type="text" id="userGpuInput" oninput="showSuggestions('gpu')" onfocus="showSuggestions('gpu')" placeholder="Nvidia, AMD, UHD..." autocomplete="off" class="w-full bg-gray-950/40 border dynamic-border rounded-lg p-2 text-white text-xs outline-none">
+                        <div id="gpuSuggestions" class="hidden absolute left-0 right-0 top-full mt-1 max-h-48 overflow-y-auto bg-gray-800 border dynamic-border rounded-lg z-20 suggestions-scrollbar shadow-2xl divide-y divide-gray-700/50"></div>
                     </div>
                     <div class="relative">
-                        <label class="block text-xs text-gray-400 mb-1">RAM Module</label>
-                        <input type="text" id="userRamInput" oninput="showSuggestions('ram')" onfocus="showSuggestions('ram')" placeholder="RAM Details..." autocomplete="off" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white text-xs outline-none">
-                        <div id="ramSuggestions" class="hidden absolute left-0 right-0 top-full mt-1 max-h-48 overflow-y-auto bg-gray-800 border border-gray-700 rounded-lg z-20 suggestions-scrollbar shadow-2xl divide-y divide-gray-700/50 font-sans"></div>
+                        <label class="block text-xs dynamic-text-muted mb-1">RAM Module</label>
+                        <input type="text" id="userRamInput" oninput="showSuggestions('ram')" onfocus="showSuggestions('ram')" placeholder="RAM Details..." autocomplete="off" class="w-full bg-gray-955 border dynamic-border bg-gray-950/40 rounded-lg p-2 text-white text-xs outline-none">
+                        <div id="ramSuggestions" class="hidden absolute left-0 right-0 top-full mt-1 max-h-48 overflow-y-auto bg-gray-800 border dynamic-border rounded-lg z-20 suggestions-scrollbar shadow-2xl divide-y divide-gray-700/50 font-sans"></div>
                     </div>
-                    <div class="mt-4 pt-4 border-t border-gray-700 space-y-2 text-xs font-sans">
-                        <div class="flex items-center justify-between bg-gray-900/60 p-2 rounded border border-gray-700">
-                            <span class="text-gray-400">CPU Tier:</span>
+                    <div class="mt-4 pt-4 border-t dynamic-border space-y-2 text-xs font-sans">
+                        <div class="flex items-center justify-between bg-gray-950/20 p-2 rounded border dynamic-border">
+                            <span class="dynamic-text-muted">CPU Tier:</span>
                             <span id="cpuParsedBadge" class="px-2 py-0.5 rounded font-bold">Medium</span>
                         </div>
-                        <div class="flex items-center justify-between bg-gray-900/60 p-2 rounded border border-gray-700">
-                            <span class="text-gray-400">Parsed GPU:</span>
+                        <div class="flex items-center justify-between bg-gray-955/20 p-2 rounded border dynamic-border">
+                            <span class="dynamic-text-muted">Parsed GPU:</span>
                             <span id="gpuParsedBadge" class="px-2 py-0.5 rounded font-bold">Medium</span>
                         </div>
-                        <div class="flex items-center justify-between bg-gray-900/60 p-2 rounded border border-gray-700">
-                            <span class="text-gray-400">System RAM:</span>
+                        <div class="flex items-center justify-between bg-gray-955/20 p-2 rounded border dynamic-border">
+                            <span class="dynamic-text-muted">System RAM:</span>
                             <span id="ramParsedBadge" class="px-2 py-0.5 rounded font-bold bg-gray-800">8 GB</span>
                         </div>
                     </div>
@@ -110,31 +151,31 @@
             </div>
 
             <!-- Filters & Custom Themes Selector -->
-            <div class="bg-gray-800 p-5 rounded-xl border border-gray-700 shadow-sm space-y-4">
-                <h2 class="text-lg font-bold text-gray-200 border-b border-gray-700 pb-2 flex items-center gap-2">
-                    <i class="fa-solid fa-filter text-indigo-400"></i> Interface Config
+            <div class="dynamic-card p-5 rounded-xl border shadow-sm space-y-4">
+                <h2 class="text-lg font-bold border-b pb-2 dynamic-border flex items-center gap-2">
+                    <i class="fa-solid fa-filter dynamic-accent-text"></i> Interface Config
                 </h2>
                 <div>
-                    <label class="block text-xs text-gray-400 mb-1">Select Theme</label>
-                    <select id="themeSelect" onchange="applyTheme(this.value)" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white text-xs outline-none">
+                    <label class="block text-xs dynamic-text-muted mb-1">Select Theme</label>
+                    <select id="themeSelect" onchange="applyTheme(this.value)" class="w-full bg-gray-950/40 border dynamic-border rounded-lg p-2 text-white text-xs outline-none">
                         <option value="dark">Slate Dark (Default)</option>
                         <option value="cyber">Cyberpunk Neon</option>
                         <option value="emerald">Forest Emerald</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs text-gray-400 mb-1">Search Game</label>
-                    <input type="text" id="filterSearch" oninput="runAnalysis()" placeholder="Type to search..." class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white text-xs outline-none">
+                    <label class="block text-xs dynamic-text-muted mb-1">Search Game</label>
+                    <input type="text" id="filterSearch" oninput="runAnalysis()" placeholder="Type to search..." class="w-full bg-gray-950/40 border dynamic-border rounded-lg p-2 text-white text-xs outline-none">
                 </div>
                 <div>
-                    <label class="block text-xs text-gray-400 mb-1">Genre Filter</label>
-                    <select id="filterGenre" onchange="runAnalysis()" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white text-xs outline-none">
+                    <label class="block text-xs dynamic-text-muted mb-1">Genre Filter</label>
+                    <select id="filterGenre" onchange="runAnalysis()" class="w-full bg-gray-950/40 border dynamic-border rounded-lg p-2 text-white text-xs outline-none">
                         <option value="All">All Genres</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs text-gray-400 mb-1">Compatibility Filter</label>
-                    <select id="filterRun" onchange="runAnalysis()" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white text-xs outline-none">
+                    <label class="block text-xs dynamic-text-muted mb-1">Compatibility Filter</label>
+                    <select id="filterRun" onchange="runAnalysis()" class="w-full bg-gray-950/40 border dynamic-border rounded-lg p-2 text-white text-xs outline-none">
                         <option value="All">All Statuses</option>
                         <option value="Outstanding">Outstanding</option>
                         <option value="Playable">Playable</option>
@@ -148,83 +189,80 @@
 
         <!-- Main Display Column -->
         <main class="lg:col-span-3">
-            <h2 class="text-xl font-bold text-gray-200 mb-4 flex items-center justify-between">
+            <h2 class="text-xl font-bold mb-4 flex items-center justify-between">
                 <span>Recommendations Feed</span>
-                <span id="gameCount" class="text-sm font-normal text-gray-400"></span>
+                <span id="gameCount" class="text-sm font-normal dynamic-text-muted"></span>
             </h2>
             <div id="gamesGrid" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
-            <div id="noGamesView" class="hidden flex flex-col items-center justify-center py-20 text-center bg-gray-800 rounded-xl border border-gray-700 border-dashed">
-                <i class="fa-solid fa-ghost text-5xl text-gray-600 mb-4"></i>
-                <p class="text-gray-400 text-lg">No matches found.</p>
+            <div id="noGamesView" class="hidden flex flex-col items-center justify-center py-20 text-center dynamic-card rounded-xl border border-dashed">
+                <i class="fa-solid fa-ghost text-5xl dynamic-text-muted mb-4"></i>
+                <p class="text-lg">No matches found.</p>
             </div>
         </main>
     </div>
 
     <!-- Modal 1: PIN Access check -->
     <div id="pinModal" class="hidden fixed inset-0 bg-black/75 flex items-center justify-center p-4 z-50 animate-fade-in">
-        <div class="bg-gray-800 rounded-xl border border-gray-700 max-w-sm w-full p-6 shadow-2xl">
-            <h3 class="text-lg font-bold text-gray-100 mb-2">Access Admin Console</h3>
-            <p class="text-sm text-gray-400 mb-4">Input PIN to proceed.</p>
-            <input type="password" id="adminPin" placeholder="Enter PIN..." class="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white focus:outline-none mb-4">
+        <div class="dynamic-card rounded-xl border max-w-sm w-full p-6 shadow-2xl">
+            <h3 class="text-lg font-bold mb-2">Access Admin Console</h3>
+            <p class="text-sm dynamic-text-muted mb-4">Input PIN to proceed.</p>
+            <input type="password" id="adminPin" placeholder="Enter PIN..." class="w-full bg-gray-950/40 border dynamic-border rounded-lg p-3 text-white focus:outline-none mb-4">
             <div class="flex justify-end gap-3">
-                <button onclick="closePinModal()" class="px-4 py-2 text-gray-400">Cancel</button>
-                <button onclick="verifyPin()" class="bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg">Submit</button>
+                <button onclick="closePinModal()" class="px-4 py-2 dynamic-text-muted">Cancel</button>
+                <button onclick="verifyPin()" class="dynamic-accent-btn font-semibold py-2 px-4 rounded-lg transition">Submit</button>
             </div>
         </div>
     </div>
 
-    <!-- Modal 2: Profile Completion setup -->
+    <!-- Modal 2: Profile Completion setup (Username Only) -->
     <div id="profileModal" class="hidden fixed inset-0 bg-black/75 flex items-center justify-center p-4 z-50">
-        <div class="bg-gray-800 rounded-xl border border-gray-700 max-w-sm w-full p-6 shadow-2xl">
-            <h3 class="text-lg font-bold text-white mb-2">Setup Profile</h3>
-            <p class="text-xs text-gray-400 mb-4">Add your name and optional picture to begin posting reviews.</p>
+        <div class="dynamic-card rounded-xl border max-w-sm w-full p-6 shadow-2xl">
+            <h3 class="text-lg font-bold mb-2">Setup Profile</h3>
+            <p class="text-xs dynamic-text-muted mb-4">Enter a display name to personalize your account profile.</p>
             <div class="space-y-3">
-                <input type="text" id="setupUsername" placeholder="Display Name / Username" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 text-white text-xs outline-none">
-                <input type="text" id="setupAvatar" placeholder="Avatar URL (Optional)" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 text-white text-xs outline-none">
-                <input type="tel" id="setupPhone" placeholder="Phone Number (Optional - Required to leave reviews)" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 text-white text-xs outline-none">
-                <p class="text-[10px] text-gray-500 font-sans">A verified phone number prevents bot review spam [5].</p>
-                <button onclick="saveUserProfile()" class="w-full bg-indigo-600 py-2 rounded-lg font-bold text-sm">Save Profile</button>
+                <input type="text" id="setupUsername" placeholder="Display Name / Username" class="w-full bg-gray-950/40 border dynamic-border rounded-lg p-2.5 text-white text-xs outline-none">
+                <button onclick="saveUserProfile()" class="w-full dynamic-accent-btn py-2 rounded-lg font-bold text-sm transition">Save Profile</button>
             </div>
         </div>
     </div>
 
     <!-- Modal 3: Game Add/Edit details -->
     <div id="addGameModal" class="hidden fixed inset-0 bg-black/75 flex items-center justify-center p-4 z-50 overflow-y-auto">
-        <div class="bg-gray-800 rounded-xl border border-gray-700 max-w-lg w-full p-6 shadow-2xl my-8">
+        <div class="dynamic-card rounded-xl border max-w-lg w-full p-6 shadow-2xl my-8">
             <div class="flex justify-between items-center mb-6">
                 <h3 class="text-xl font-bold text-white" id="gameModalTitle">Add New Game</h3>
-                <button onclick="closeAddGameModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+                <button onclick="closeAddGameModal()" class="dynamic-text-muted hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
             <div class="space-y-4">
                 <div class="flex gap-2">
-                    <input type="text" id="gameTitle" placeholder="Game Title" class="flex-1 bg-gray-700 border border-gray-600 rounded-lg p-2 text-white outline-none">
+                    <input type="text" id="gameTitle" placeholder="Game Title" class="flex-1 bg-gray-950/40 border dynamic-border rounded-lg p-2 text-white outline-none">
                     <button onclick="runAiReview()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-4 rounded-lg flex items-center gap-1 transition">AI Review</button>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
-                    <input type="text" id="gameBanner" placeholder="Banner URL" class="bg-gray-700 border border-gray-600 rounded-lg p-2 text-white outline-none">
-                    <input type="text" id="gameIcon" placeholder="Icon URL" class="bg-gray-700 border border-gray-600 rounded-lg p-2 text-white outline-none">
+                    <input type="text" id="gameBanner" placeholder="Banner URL" class="bg-gray-950/40 border dynamic-border rounded-lg p-2 text-white outline-none">
+                    <input type="text" id="gameIcon" placeholder="Icon URL" class="bg-gray-955/40 border dynamic-border rounded-lg p-2 text-white outline-none">
                 </div>
-                <input type="text" id="gameGenre" placeholder="Genre" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white outline-none">
+                <input type="text" id="gameGenre" placeholder="Genre" class="w-full bg-gray-950/40 border dynamic-border rounded-lg p-2 text-white outline-none">
                 <div class="grid grid-cols-3 gap-3">
-                    <select id="reqCpu" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white outline-none">
+                    <select id="reqCpu" class="w-full bg-gray-950/40 border dynamic-border rounded-lg p-2 text-white outline-none">
                         <option value="Low">Low CPU</option><option value="Medium">Medium CPU</option><option value="High">High CPU</option>
                     </select>
-                    <select id="reqGpu" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white outline-none">
+                    <select id="reqGpu" class="w-full bg-gray-950/40 border dynamic-border rounded-lg p-2 text-white outline-none">
                         <option value="Low">Low GPU</option><option value="Medium">Medium GPU</option><option value="High">High GPU</option>
                     </select>
-                    <input type="number" id="reqRam" value="8" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white outline-none">
+                    <input type="number" id="reqRam" value="8" class="w-full bg-gray-955 border dynamic-border bg-gray-950/40 rounded-lg p-2 text-white outline-none">
                 </div>
                 <div class="grid grid-cols-2 gap-4">
-                    <input type="text" id="gameRating" placeholder="Player Review Score (e.g. 9.0/10)" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white outline-none">
-                    <select id="gameAiRecommend" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white outline-none">
+                    <input type="text" id="gameRating" placeholder="Player Review Score (e.g. 9.0/10)" class="w-full bg-gray-950/40 border dynamic-border rounded-lg p-2 text-white outline-none">
+                    <select id="gameAiRecommend" class="w-full bg-gray-950/40 border dynamic-border rounded-lg p-2 text-white outline-none">
                         <option value="Recommended">Recommended 👍</option><option value="Not Recommended">Not Recommended 👎</option>
                     </select>
                 </div>
-                <div class="flex justify-between items-center pt-4 border-t border-gray-700">
-                    <button id="deleteGameBtn" onclick="deleteCurrentGame()" class="hidden bg-red-600 hover:bg-red-500 text-white font-semibold py-2 px-4 rounded-lg">Delete Game</button>
+                <div class="flex justify-between items-center pt-4 border-t dynamic-border">
+                    <button id="deleteGameBtn" onclick="deleteCurrentGame()" class="hidden bg-red-600 hover:bg-red-500 text-white font-semibold py-2 px-4 rounded-lg transition">Delete Game</button>
                     <div class="flex gap-3 ml-auto">
-                        <button onclick="closeAddGameModal()" class="px-4 py-2 text-gray-400">Cancel</button>
-                        <button onclick="saveNewGame()" class="bg-indigo-600 text-white font-semibold py-2 px-6 rounded-lg" id="saveGameBtnText">Save Game</button>
+                        <button onclick="closeAddGameModal()" class="px-4 py-2 dynamic-text-muted">Cancel</button>
+                        <button onclick="saveNewGame()" class="dynamic-accent-btn font-semibold py-2 px-6 rounded-lg transition" id="saveGameBtnText">Save Game</button>
                     </div>
                 </div>
             </div>
@@ -324,8 +362,7 @@
 
         function applyTheme(themeKey) {
             const body = document.getElementById('themeBody');
-            const theme = themes[themeKey] || themes.dark;
-            body.className = `${theme.bg} font-sans min-h-screen transition-colors duration-300`;
+            body.className = `font-sans min-h-screen transition-colors duration-300 theme-${themeKey} dynamic-bg`;
             localStorage.setItem('selected_theme', themeKey);
             runAnalysis();
         }
@@ -436,7 +473,7 @@
             container.classList.remove('hidden');
             matches.forEach(match => {
                 const itemDiv = document.createElement('div');
-                itemDiv.className = "p-2 hover:bg-indigo-600 cursor-pointer text-xs font-semibold";
+                itemDiv.className = "p-2.5 text-xs text-gray-300 hover:bg-indigo-600 hover:text-white cursor-pointer transition duration-100 font-medium";
                 itemDiv.textContent = match;
                 itemDiv.addEventListener('mousedown', (e) => {
                     e.preventDefault();
@@ -558,10 +595,9 @@
             }
         });
 
+        // Simplified: Save Profile (Username only) [8]
         async function saveUserProfile() {
             const username = document.getElementById('setupUsername').value.trim();
-            const avatar = document.getElementById('setupAvatar').value.trim();
-            const phone = document.getElementById('setupPhone').value.trim();
 
             if (!username) {
                 alert("Please fill in Display Name / Username to continue.");
@@ -571,8 +607,8 @@
             try {
                 const profile = {
                     username,
-                    profilePic: avatar || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${currentUser.uid}`,
-                    phone: phone || "No phone added" // Phone number is optional [5]
+                    profilePic: `https://api.dicebear.com/7.x/pixel-art/svg?seed=${currentUser.uid}`,
+                    phone: "No phone added" // Phone number is left optional [5]
                 };
                 await setDoc(doc(db, "users", currentUser.uid), profile);
                 currentUserProfile = profile;
@@ -682,10 +718,22 @@
             if (!currentUser || !currentUserProfile) return alert("Sign in to review.");
             
             // SPAM Security protection requires phone number [5]
-            const phone = currentUserProfile.phone;
+            let phone = currentUserProfile.phone;
             if (!phone || phone === "No phone added" || phone.trim() === "") {
-                alert("⚠️ Anti-spam security block: To leave reviews, you must add a phone number in your account settings profile.");
-                return;
+                const userPhoneInput = prompt("⚠️ Anti-spam protection: Please enter your phone number to verify your account and post reviews:");
+                if (!userPhoneInput || userPhoneInput.trim() === "") {
+                    alert("Review canceled. A phone number is required to review games.");
+                    return;
+                }
+                
+                try {
+                    currentUserProfile.phone = userPhoneInput.trim();
+                    await updateDoc(doc(db, "users", currentUser.uid), { phone: userPhoneInput.trim() });
+                    document.getElementById('userPhone').textContent = `Verified: ${currentUserProfile.phone}`;
+                } catch (err) {
+                    alert("Error linking phone number: " + err.message);
+                    return;
+                }
             }
 
             const review = {
