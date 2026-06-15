@@ -111,7 +111,7 @@
                             <input type="text" id="userCpuInput" oninput="showSuggestions('cpu')" onfocus="showSuggestions('cpu')" placeholder="Pentium, Core, Ryzen..." autocomplete="off" class="flex-1 bg-gray-955 border dynamic-border bg-gray-950/40 rounded-lg p-2 text-white text-xs outline-none">
                             <button id="turboBtn" onclick="toggleTurbo()" class="hidden bg-amber-600 hover:bg-amber-500 text-white text-[10px] px-2 rounded-lg font-bold transition">⚡ Turbo</button>
                         </div>
-                        <div id="cpuSuggestions" class="hidden absolute left-0 right-0 top-full mt-1 max-h-48 overflow-y-auto bg-gray-800 border dynamic-border rounded-lg z-20 suggestions-scrollbar shadow-2xl divide-y divide-gray-700/50"></div>
+                        <div id="cpuSuggestions" class="hidden absolute left-0 right-0 top-full mt-1 max-h-48 overflow-y-auto dynamic-card border rounded-lg z-20 suggestions-scrollbar shadow-2xl divide-y divide-gray-700/50"></div>
                     </div>
                     <div class="grid grid-cols-2 gap-2">
                         <div>
@@ -126,12 +126,12 @@
                     <div class="relative">
                         <label class="block text-xs dynamic-text-muted mb-1">GPU Model</label>
                         <input type="text" id="userGpuInput" oninput="showSuggestions('gpu')" onfocus="showSuggestions('gpu')" placeholder="Nvidia, AMD, UHD..." autocomplete="off" class="w-full bg-gray-950/40 border dynamic-border rounded-lg p-2 text-white text-xs outline-none">
-                        <div id="gpuSuggestions" class="hidden absolute left-0 right-0 top-full mt-1 max-h-48 overflow-y-auto bg-gray-800 border dynamic-border rounded-lg z-20 suggestions-scrollbar shadow-2xl divide-y divide-gray-700/50"></div>
+                        <div id="gpuSuggestions" class="hidden absolute left-0 right-0 top-full mt-1 max-h-48 overflow-y-auto dynamic-card border rounded-lg z-20 suggestions-scrollbar shadow-2xl divide-y divide-gray-700/50"></div>
                     </div>
                     <div class="relative">
                         <label class="block text-xs dynamic-text-muted mb-1">RAM Module</label>
                         <input type="text" id="userRamInput" oninput="showSuggestions('ram')" onfocus="showSuggestions('ram')" placeholder="RAM Details..." autocomplete="off" class="w-full bg-gray-955 border dynamic-border bg-gray-950/40 rounded-lg p-2 text-white text-xs outline-none">
-                        <div id="ramSuggestions" class="hidden absolute left-0 right-0 top-full mt-1 max-h-48 overflow-y-auto bg-gray-800 border dynamic-border rounded-lg z-20 suggestions-scrollbar shadow-2xl divide-y divide-gray-700/50 font-sans"></div>
+                        <div id="ramSuggestions" class="hidden absolute left-0 right-0 top-full mt-1 max-h-48 overflow-y-auto dynamic-card border rounded-lg z-20 suggestions-scrollbar shadow-2xl divide-y divide-gray-700/50 font-sans"></div>
                     </div>
                     <div class="mt-4 pt-4 border-t dynamic-border space-y-2 text-xs font-sans">
                         <div class="flex items-center justify-between bg-gray-950/20 p-2 rounded border dynamic-border">
@@ -169,13 +169,13 @@
                 </div>
                 <div>
                     <label class="block text-xs dynamic-text-muted mb-1">Genre Filter</label>
-                    <select id="filterGenre" onchange="runAnalysis()" class="w-full bg-gray-950/40 border dynamic-border rounded-lg p-2 text-white text-xs outline-none">
+                    <select id="filterGenre" onchange="runAnalysis()" class="w-full bg-gray-700 border dynamic-border rounded-lg p-2 text-white text-xs outline-none">
                         <option value="All">All Genres</option>
                     </select>
                 </div>
                 <div>
                     <label class="block text-xs dynamic-text-muted mb-1">Compatibility Filter</label>
-                    <select id="filterRun" onchange="runAnalysis()" class="w-full bg-gray-950/40 border dynamic-border rounded-lg p-2 text-white text-xs outline-none">
+                    <select id="filterRun" onchange="runAnalysis()" class="w-full bg-gray-700 border dynamic-border rounded-lg p-2 text-white text-xs outline-none">
                         <option value="All">All Statuses</option>
                         <option value="Outstanding">Outstanding</option>
                         <option value="Playable">Playable</option>
@@ -217,7 +217,7 @@
     <!-- Modal 2: Profile Completion setup (Username Only) -->
     <div id="profileModal" class="hidden fixed inset-0 bg-black/75 flex items-center justify-center p-4 z-50">
         <div class="dynamic-card rounded-xl border max-w-sm w-full p-6 shadow-2xl">
-            <h3 class="text-lg font-bold mb-2">Setup Profile</h3>
+            <h3 class="text-lg font-bold text-white mb-2">Setup Profile</h3>
             <p class="text-xs dynamic-text-muted mb-4">Enter a display name to personalize your account profile.</p>
             <div class="space-y-3">
                 <input type="text" id="setupUsername" placeholder="Display Name / Username" class="w-full bg-gray-950/40 border dynamic-border rounded-lg p-2.5 text-white text-xs outline-none">
@@ -235,7 +235,7 @@
             </div>
             <div class="space-y-4">
                 <div class="flex gap-2">
-                    <input type="text" id="gameTitle" placeholder="Game Title" class="flex-1 bg-gray-950/40 border dynamic-border rounded-lg p-2 text-white outline-none">
+                    <input type="text" id="gameTitle" placeholder="Game Title" class="flex-1 bg-gray-955/40 border dynamic-border rounded-lg p-2 text-white outline-none">
                     <button onclick="runAiReview()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-4 rounded-lg flex items-center gap-1 transition">AI Review</button>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
@@ -250,7 +250,7 @@
                     <select id="reqGpu" class="w-full bg-gray-950/40 border dynamic-border rounded-lg p-2 text-white outline-none">
                         <option value="Low">Low GPU</option><option value="Medium">Medium GPU</option><option value="High">High GPU</option>
                     </select>
-                    <input type="number" id="reqRam" value="8" class="w-full bg-gray-955 border dynamic-border bg-gray-950/40 rounded-lg p-2 text-white outline-none">
+                    <input type="number" id="reqRam" value="8" class="w-full bg-gray-955 border dynamic-border bg-gray-955/40 rounded-lg p-2 text-white outline-none">
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <input type="text" id="gameRating" placeholder="Player Review Score (e.g. 9.0/10)" class="w-full bg-gray-950/40 border dynamic-border rounded-lg p-2 text-white outline-none">
@@ -258,11 +258,11 @@
                         <option value="Recommended">Recommended 👍</option><option value="Not Recommended">Not Recommended 👎</option>
                     </select>
                 </div>
-                <div class="flex justify-between items-center pt-4 border-t dynamic-border">
-                    <button id="deleteGameBtn" onclick="deleteCurrentGame()" class="hidden bg-red-600 hover:bg-red-500 text-white font-semibold py-2 px-4 rounded-lg transition">Delete Game</button>
+                <div class="flex justify-between items-center pt-4 border-t border-gray-700">
+                    <button id="deleteGameBtn" onclick="deleteCurrentGame()" class="hidden bg-red-600 hover:bg-red-500 text-white font-semibold py-2 px-4 rounded-lg">Delete Game</button>
                     <div class="flex gap-3 ml-auto">
                         <button onclick="closeAddGameModal()" class="px-4 py-2 dynamic-text-muted">Cancel</button>
-                        <button onclick="saveNewGame()" class="dynamic-accent-btn font-semibold py-2 px-6 rounded-lg transition" id="saveGameBtnText">Save Game</button>
+                        <button onclick="saveNewGame()" class="bg-indigo-600 text-white font-semibold py-2 px-6 rounded-lg" id="saveGameBtnText">Save Game</button>
                     </div>
                 </div>
             </div>
@@ -473,7 +473,7 @@
             container.classList.remove('hidden');
             matches.forEach(match => {
                 const itemDiv = document.createElement('div');
-                itemDiv.className = "p-2.5 text-xs text-gray-300 hover:bg-indigo-600 hover:text-white cursor-pointer transition duration-100 font-medium";
+                itemDiv.className = "p-2 hover:bg-indigo-600 cursor-pointer text-xs font-semibold";
                 itemDiv.textContent = match;
                 itemDiv.addEventListener('mousedown', (e) => {
                     e.preventDefault();
@@ -604,17 +604,29 @@
                 return;
             }
 
+            const activeUser = auth.currentUser;
+            if (!activeUser) {
+                alert("Please sign in again to configure your profile.");
+                return;
+            }
+
             try {
                 const profile = {
                     username,
-                    profilePic: `https://api.dicebear.com/7.x/pixel-art/svg?seed=${currentUser.uid}`,
+                    profilePic: `https://api.dicebear.com/7.x/pixel-art/svg?seed=${activeUser.uid}`,
                     phone: "No phone added" // Phone number is left optional [5]
                 };
-                await setDoc(doc(db, "users", currentUser.uid), profile);
+                await setDoc(doc(db, "users", activeUser.uid), profile);
                 currentUserProfile = profile;
+                
+                // Real-time local state update (Removes modal freeze)
+                document.getElementById('userName').textContent = profile.username;
+                document.getElementById('userAvatar').src = profile.profilePic;
+                document.getElementById('userPhone').textContent = "No verified phone";
+                
                 document.getElementById('profileModal').classList.add('hidden');
-                location.reload();
-            } catch (err) { alert(err.message); }
+                runAnalysis();
+            } catch (err) { alert("Error saving profile: " + err.message); }
         }
 
         // Real-Time Database Event Observers (Sync changes instantly)
@@ -659,6 +671,7 @@
         }
 
         // Fullscreen Modal Details & Interactive Reviews [5]
+        // This is now fully tied to clicking cards or titles to display the game details cleanly [5].
         function openGameViewModal(gameId) {
             const game = localGames.find(g => g.id === gameId);
             if (!game) return;
@@ -961,42 +974,6 @@
             }
         }
 
-        function openAddGameModal() { document.getElementById('addGameModal').classList.remove('hidden'); }
-        
-        function openEditGameModal(gameId) {
-            const game = localGames.find(g => g.id === gameId);
-            if (!game) return;
-
-            document.getElementById('gameTitle').value = game.title || '';
-            document.getElementById('gameBanner').value = game.banner || '';
-            document.getElementById('gameIcon').value = game.icon || '';
-            document.getElementById('gameGenre').value = game.genre || '';
-            document.getElementById('reqCpu').value = game.reqCpu || 'Medium';
-            document.getElementById('reqGpu').value = game.reqGpu || 'Medium';
-            document.getElementById('reqRam').value = game.reqRam || 8;
-            document.getElementById('gameRating').value = game.rating || 'Unrated';
-            document.getElementById('gameAiRecommend').value = game.aiRecommend || 'Recommended';
-
-            document.getElementById('gameModalTitle').textContent = "Edit Game Requirements";
-            document.getElementById('saveGameBtnText').textContent = "Save Changes";
-            document.getElementById('deleteGameBtn').classList.remove('hidden');
-
-            document.getElementById('addGameModal').classList.remove('hidden');
-        }
-
-        function closeAddGameModal() {
-            document.getElementById('addGameModal').classList.add('hidden');
-            clearForm();
-        }
-
-        function closeGameViewModal() {
-            document.getElementById('gameViewModal').classList.add('hidden');
-            if (reviewSubscription) {
-                reviewSubscription();
-                reviewSubscription = null;
-            }
-        }
-
         // Trigger PIN popup for editing specs
         function triggerEditGame(gameId) {
             if (!currentUser) {
@@ -1006,38 +983,6 @@
             activeAuthAction = 'edit';
             selectedGameId = gameId;
             openPinModal('edit');
-        }
-
-        // AI Matcher logic
-        function runAiReview() {
-            const title = document.getElementById('gameTitle').value.trim();
-            if (!title) {
-                alert("Please input a game title first.");
-                return;
-            }
-
-            const lowerTitle = title.toLowerCase();
-            const matched = popularGames.find(g => 
-                g.keywords.some(keyword => lowerTitle.includes(keyword))
-            );
-
-            if (matched) {
-                document.getElementById('reqCpu').value = matched.cpu;
-                document.getElementById('reqGpu').value = matched.gpu;
-                document.getElementById('reqRam').value = matched.ram;
-                document.getElementById('gameRating').value = matched.rating;
-                document.getElementById('gameGenre').value = matched.genre || 'General';
-                const score = parseFloat(matched.rating) || 0;
-                document.getElementById('gameAiRecommend').value = (score >= 7.0) ? 'Recommended' : 'Not Recommended';
-                alert(`AI matched a profile for "${title}". Review and edit requirements manually if incorrect.`);
-            } else {
-                document.getElementById('reqCpu').value = 'Medium';
-                document.getElementById('reqGpu').value = 'Medium';
-                document.getElementById('reqRam').value = '8';
-                document.getElementById('gameRating').value = 'Unrated';
-                document.getElementById('gameAiRecommend').value = 'Recommended';
-                alert(`"${title}" was not recognized. Initialized as "Unrated" with medium baseline requirements. Configure manually.`);
-            }
         }
 
         // Global exposing modules for inline click operations
@@ -1054,7 +999,6 @@
         window.openAddGameModal = openAddGameModal;
         window.closeAddGameModal = closeAddGameModal;
         window.showSuggestions = showSuggestions;
-        window.selectSuggestion = selectSuggestion;
         window.hideSuggestions = hideSuggestions;
         window.clearForm = clearForm;
         window.triggerEditGame = triggerEditGame;
