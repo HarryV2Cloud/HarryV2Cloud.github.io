@@ -177,12 +177,12 @@
     <div id="profileModal" class="hidden fixed inset-0 bg-black/75 flex items-center justify-center p-4 z-50">
         <div class="bg-gray-800 rounded-xl border border-gray-700 max-w-sm w-full p-6 shadow-2xl">
             <h3 class="text-lg font-bold text-white mb-2">Setup Profile</h3>
-            <p class="text-xs text-gray-400 mb-4">Add your name, picture, and phone number to begin posting reviews.</p>
+            <p class="text-xs text-gray-400 mb-4">Add your name and optional picture to begin posting reviews.</p>
             <div class="space-y-3">
                 <input type="text" id="setupUsername" placeholder="Display Name / Username" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 text-white text-xs outline-none">
                 <input type="text" id="setupAvatar" placeholder="Avatar URL (Optional)" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 text-white text-xs outline-none">
-                <input type="tel" id="setupPhone" placeholder="Phone Number (e.g., +15551234)" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 text-white text-xs outline-none">
-                <p class="text-[10px] text-gray-500">Phone numbers protect the database from spam, keeping reviews authentic.</p>
+                <input type="tel" id="setupPhone" placeholder="Phone Number (Optional - Required to leave reviews)" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 text-white text-xs outline-none">
+                <p class="text-[10px] text-gray-500 font-sans">A verified phone number prevents bot review spam [5].</p>
                 <button onclick="saveUserProfile()" class="w-full bg-indigo-600 py-2 rounded-lg font-bold text-sm">Save Profile</button>
             </div>
         </div>
@@ -233,7 +233,7 @@
 
     <!-- Modal 4: Fullscreen Game View & Interactive Reviews -->
     <div id="gameViewModal" class="hidden fixed inset-0 bg-gray-950/95 flex items-center justify-center p-0 z-50 overflow-y-auto">
-        <div class="min-h-screen w-full max-w-5xl bg-gray-900 border-x border-gray-800 flex flex-col">
+        <div class="min-h-screen w-full max-w-5xl bg-gray-900 border-x border-gray-800 flex flex-col animate-fade-in">
             <!-- Banner Head -->
             <div id="viewBanner" class="h-64 md:h-80 bg-cover bg-center relative">
                 <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-black/60"></div>
@@ -242,7 +242,7 @@
             
             <div class="p-6 md:p-10 flex-1 grid grid-cols-1 md:grid-cols-3 gap-8">
                 <!-- Info Spec Column -->
-                <div class="space-y-6 md:col-span-1">
+                <div class="space-y-6 md:col-span-1 font-sans">
                     <div class="flex items-center gap-4">
                         <img id="viewIcon" class="w-16 h-10 rounded-xl object-cover bg-gray-800 border border-gray-700">
                         <div>
@@ -252,8 +252,8 @@
                     </div>
                     <div class="bg-gray-800 p-4 rounded-xl border border-gray-700 space-y-3 text-xs">
                         <h4 class="font-bold border-b border-gray-700 pb-2">Target Minimum Specs:</h4>
-                        <div class="flex justify-between"><span>CPU Tier:</span><span id="viewCpu" class="font-bold"></span></div>
-                        <div class="flex justify-between"><span>GPU Tier:</span><span id="viewGpu" class="font-bold"></span></div>
+                        <div class="flex justify-between"><span>CPU Target:</span><span id="viewCpu" class="font-bold"></span></div>
+                        <div class="flex justify-between"><span>GPU Target:</span><span id="viewGpu" class="font-bold"></span></div>
                         <div class="flex justify-between"><span>RAM Footprint:</span><span id="viewRam" class="font-bold"></span></div>
                     </div>
                     <div id="viewPlayabilityBox" class="p-4 rounded-xl border text-center font-bold text-sm"></div>
@@ -380,8 +380,9 @@
 
             let tier = "Medium";
             let rawGhz = parseFloat(document.getElementById('userCpuGhz').value) || 2.0;
-            // Intel Turbo Boost logic adds +1.2 GHz clock speed [8]
-            let speed = isTurboActive ? rawGhz + 1.2 : rawGhz;
+            // Intel Turbo Boost logic adds +1.2 GHz clock speed if compatible [8]
+            let isIntel = text.includes("INTEL");
+            let speed = (isTurboActive && isIntel) ? rawGhz + 1.2 : rawGhz;
 
             if (text.includes("PENTIUM") || text.includes("GOLD") || text.includes("SILVER") || text.includes("CELERON") || speed < 2.0) {
                 tier = "Low";
@@ -453,6 +454,14 @@
         }
 
         function toggleTurbo() {
+            const cpuVal = document.getElementById('userCpuInput').value.toUpperCase();
+            // Block Turbo activation on unsupported (non-Intel) CPUs [8]
+            if (!cpuVal.includes("INTEL")) {
+                alert("Turbo Mode is only supported on Intel processors.");
+                isTurboActive = false;
+                onHardwareInput();
+                return;
+            }
             isTurboActive = !isTurboActive;
             const btn = document.getElementById('turboBtn');
             btn.classList.toggle('bg-amber-600', !isTurboActive);
@@ -465,8 +474,14 @@
             const gpuVal = document.getElementById('userGpuInput').value;
             const ramVal = document.getElementById('userRamInput').value;
 
-            // Display turbo button only on Intel configurations [8]
-            document.getElementById('turboBtn').classList.toggle('hidden', !cpuVal.toUpperCase().includes("INTEL"));
+            // Reset Turbo value to 0 if User edits text to a non-Intel CPU [8]
+            if (!cpuVal.toUpperCase().includes("INTEL")) {
+                isTurboActive = false;
+                const btn = document.getElementById('turboBtn');
+                btn.className = "hidden bg-amber-600 hover:bg-amber-500 text-white text-[10px] px-2 rounded-lg font-bold transition";
+            } else {
+                document.getElementById('turboBtn').classList.remove('hidden');
+            }
 
             const parsedCpu = parseCPU(cpuVal);
             const parsedGpu = parseGPU(gpuVal);
@@ -536,7 +551,9 @@
                     currentUserProfile = d.data();
                     document.getElementById('userName').textContent = currentUserProfile.username;
                     document.getElementById('userAvatar').src = currentUserProfile.profilePic || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${user.uid}`;
-                    document.getElementById('userPhone').textContent = currentUserProfile.phone ? `Verified: ${currentUserProfile.phone}` : "No verified phone";
+                    
+                    const isPhoneLinked = currentUserProfile.phone && currentUserProfile.phone !== "No phone added" && currentUserProfile.phone.trim() !== "";
+                    document.getElementById('userPhone').textContent = isPhoneLinked ? `Verified: ${currentUserProfile.phone}` : "No verified phone";
                 }
             }
         });
@@ -546,8 +563,8 @@
             const avatar = document.getElementById('setupAvatar').value.trim();
             const phone = document.getElementById('setupPhone').value.trim();
 
-            if (!username || !phone) {
-                alert("Please fill in Display Name and Phone number to continue.");
+            if (!username) {
+                alert("Please fill in Display Name / Username to continue.");
                 return;
             }
 
@@ -555,7 +572,7 @@
                 const profile = {
                     username,
                     profilePic: avatar || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${currentUser.uid}`,
-                    phone
+                    phone: phone || "No phone added" // Phone number is optional [5]
                 };
                 await setDoc(doc(db, "users", currentUser.uid), profile);
                 currentUserProfile = profile;
@@ -664,9 +681,10 @@
             e.preventDefault();
             if (!currentUser || !currentUserProfile) return alert("Sign in to review.");
             
-            // SPAM Security protection require phone number [5]
-            if (!currentUserProfile.phone || currentUserProfile.phone === "No phone added") {
-                alert("⚠️ anti-spam security blocks unverified reviews. You must register a phone number in your settings profile to post reviews.");
+            // SPAM Security protection requires phone number [5]
+            const phone = currentUserProfile.phone;
+            if (!phone || phone === "No phone added" || phone.trim() === "") {
+                alert("⚠️ Anti-spam security block: To leave reviews, you must add a phone number in your account settings profile.");
                 return;
             }
 
